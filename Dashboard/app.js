@@ -489,7 +489,7 @@ function matchScenario() {
   return {river, local, note: notes.join(' ')};
 }
 function fillScenarioSelect() {
-  const opt = c => `<option value="${c.id}" ${c.available?'':'disabled'}>${esc(c.name)}${c.available?'':'  (not modeled yet)'}</option>`;
+  const opt = c => `<option value="${c.id}" ${c.available?'':'disabled'}>${esc(c.name)}${c.depth_in && c.kind!=='test' ? ' — '+c.depth_in+'"' : ''}${c.available?'':'  (not modeled yet)'}</option>`;
   $('scenarioSel').innerHTML = '<option value="">— no river flood —</option>' + CAT.filter(c=>c.kind==='river' || c.kind==='combo').map(opt).join('');
   const hr = c => c.duration_hr || parseFloat(c.duration) || 0;
   $('localSel').innerHTML = '<option value="">— no storm —</option>' + CAT.filter(c=>c.kind==='rain' || c.kind==='test').sort((a,b)=>(a.kind==='test')-(b.kind==='test') || hr(a)-hr(b) || a.rp-b.rp).map(opt).join('');
