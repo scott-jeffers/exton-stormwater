@@ -1,0 +1,6 @@
+*.hdf
+*.tif
+*.npz
+*.rst
+*.bak
+__pycache__/

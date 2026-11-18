@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Valley Creek Flood Watch</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=1">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0b3d91">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20261118a">
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <header class="brand">
+      <div>
+        <div class="title">Valley Creek Flood Watch</div>
+        <div class="sub">Exton · West Whiteland · Chester County, PA</div>
+      </div>
+      <button id="btnRefresh" class="ghost" title="Reload all live data">↻ Refresh</button>
+    </header>
+    <div class="updated" id="updated">Loading live data…</div>
+
+    <section class="card status" id="statusCard">
+      <div class="status-row">
+        <div class="level" id="level">—</div>
+        <div class="level-text">
+          <div class="level-title" id="levelTitle">Checking conditions…</div>
+          <div class="level-why" id="levelWhy"></div>
+        </div>
+      </div>
+      <div id="alerts"></div>
+    </section>
+
+    <section class="card">
+      <h2>Rain <span class="help" data-tip="Past rain is radar-estimated (NOAA MRMS via Iowa Environmental Mesonet). Forecast rain is the NWS Weather Prediction Center forecast (6 hr to 7 days) at the center of the watershed. 'About a N-year storm' compares the amount to NOAA Atlas 14 for this location.">?</span></h2>
+      <div class="rain-grid">
+        <div class="rain-col">
+          <div class="rain-head">Past</div>
+          <div class="rain" id="past1"><span class="v">–</span><span class="l">last 24 hr</span></div>
+          <div class="rain" id="past3"><span class="v">–</span><span class="l">last 3 days</span></div>
+          <div class="rain" id="past7"><span class="v">–</span><span class="l">last 7 days</span></div>
+        </div>
+        <div class="rain-col">
+          <div class="rain-head">Forecast</div>
+          <div class="rain" id="qpf6"><span class="v">–</span><span class="l">next 6 hr</span><span class="rp"></span></div>
+          <div class="rain" id="qpf24"><span class="v">–</span><span class="l">next 24 hr</span><span class="rp"></span></div>
+          <div class="rain" id="qpf72"><span class="v">–</span><span class="l">next 3 days</span><span class="rp"></span></div>
+          <div class="rain" id="qpf120"><span class="v">–</span><span class="l">next 5 days</span><span class="rp"></span></div>
+          <div class="rain" id="qpf168"><span class="v">–</span><span class="l">next 7 days</span><span class="rp"></span></div>
+        </div>
+      </div>
+      <div class="fine" id="qpfIssued"></div>
+    </section>
+
+    <section class="card">
+      <h2>Flood map <span class="help" data-tip="Flood depths come from the HEC-RAS 1D/2D rain-on-grid model of Valley Creek (rain falling on the ground, storm sewers, culverts and bridges). 'Match' picks the modeled design storm closest to the NWS rain forecast.">?</span></h2>
+      <label class="row"><input type="checkbox" id="autoMatch" checked> Match the NWS rain forecast automatically</label>
+      <div id="riverPick" style="display:none"><div class="fine" style="margin-top:6px">River flood (drawn on top)</div>
+      <select id="scenarioSel"></select></div>
+      <div class="fine" style="margin-top:6px">Design storm (rain on the watershed)</div>
+      <select id="localSel"></select>
+      <div class="scen-note" id="scenNote"></div>
+      <div class="seg" id="viewSeg"><button data-view="critical" class="on">Critical only</button><button data-view="all">Everything</button></div>
+      <div class="fine" id="viewNote" style="margin:4px 0 10px">Showing only roads with 2 ft+ of water over 150 ft+ (main roads: 1 ft+ over 50 ft+), crossings with 1 ft+ over the road, buildings with 3 ft+ alongside, and flooding 1 ft+ deep.</div>
+      <div class="kpis">
+        <div class="kpi" data-tab="roads"><div class="n" id="kRoads">–</div><div class="t" id="kRoadsT">roads with 2 ft+ of water (main roads 1 ft+)</div></div>
+        <div class="kpi" data-tab="crossings"><div class="n" id="kX">–</div><div class="t" id="kXT">culverts / bridges with 1 ft+ over the road</div></div>
+        <div class="kpi" data-tab="buildings"><div class="n" id="kB">–</div><div class="t" id="kBT">buildings with 3 ft+ water alongside</div></div>
+        <div class="kpi"><div class="n" id="kA">–</div><div class="t" id="kAT">acres under 1 ft+ of water</div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Where to look first</h2>
+      <div class="tabs" id="tabs">
+        <button data-tab="roads" class="on">Roads</button>
+        <button data-tab="crossings">Crossings</button>
+        <button data-tab="buildings">Buildings</button>
+        <button data-tab="gauges">Gauges</button>
+      </div>
+      <div id="list" class="list"></div>
+    </section>
+
+    <section class="card">
+      <h2>Share &amp; export</h2>
+      <div class="btns">
+        <button id="btnSar">Flood map for SARTopo / CalTopo</button>
+        <button id="btnCsv">Road closure list (CSV)</button>
+      </div>
+      <div class="fine">The SARTopo file is GeoJSON: in SARTopo choose <b>Import</b> and pick the file. It holds the flood outline (1 ft+), plus the flooded roads and overtopped crossings in the current view.</div>
+    </section>
+
+    <section class="card about">
+      <h2>About this map</h2>
+      <p>Built from a HEC-RAS 7 rain-on-grid model of the 20.8 sq mi Valley Creek watershed with a 1-meter USGS lidar DEM, county land cover and soils, 199 road crossings and 2,383 storm sewer pipes.</p>
+      <p><b>Limits:</b> many culvert and pipe sizes and depths were estimated, not surveyed. Flood maps show likely problem areas. They do not predict exact depths. Always confirm conditions in the field.</p>
+      <p class="fine">Live data: NWS (api.weather.gov, WPC QPF), NOAA MRMS and NEXRAD via Iowa Environmental Mesonet, USGS Water Data, NOAA NWPS, FEMA NFHL.</p>
+    </section>
+  </aside>
+
+  <main id="mapWrap">
+    <div id="map"></div>
+
+    <div id="layerPanel" class="panel">
+      <div class="panel-head"><span>Map layers</span><button id="lpToggle" class="ghost small">–</button></div>
+      <div id="layerBody"></div>
+    </div>
+
+    <div id="legend" class="panel"></div>
+
+    <div id="loopBar" class="panel hidden">
+      <button id="loopPlay" class="small">❚❚</button>
+      <input type="range" id="loopSlider" min="0" max="10" value="10">
+      <span id="loopLabel" class="mono">now</span>
+    </div>
+
+    <button id="sideToggle" class="fab" title="Show / hide side panel">☰</button>
+  </main>
+</div>
+<div id="tip" class="tip"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
+<script src="data/model_layers.js"></script>
+<script src="data/fema_zones.js"></script>
+<script src="data/scenarios/index.js"></script>
+<script src="app.js?v=20261118a"></script>
+</body>
+</html>
