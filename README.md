@@ -2,7 +2,7 @@
 
 This repository holds a HEC-RAS 7 1D/2D rain-on-grid flood model and a public flood-watch dashboard for the 20.8 sq mi Valley Creek watershed in Exton / West Whiteland, Chester County, PA.
 
-- **`Dashboard/`**: a static web page showing radar, past and forecast rain (6 hr to 7 days), NWS alerts, live USGS / NOAA gauges, FEMA flood zones and modeled flood depths for the design storms. It opens at the repository root (`index.html` redirects to it).
+- **`Dashboard/`**: a static web page showing radar, past and forecast rain (6 hr to 7 days), NWS alerts, live USGS / NOAA gauges, FEMA flood zones and modeled flood depths for the design storms. Live page: https://scott-jeffers.github.io/exton-stormwater/ (GitHub Pages, served from `main`).
 - **`Model/`**: the HEC-RAS project text files (project, geometry with the storm-sewer network, flow and plan files). The large HDF results and the terrain are not stored here.
 - **`Scripts/`**: Python scripts that built the terrain, culverts, pipe network, mesh, land cover and soils, and the design-storm plans.
 - **`GIS/`**: Atlas 14 SCS Type II design-storm hyetographs and the inferred-culvert table.
