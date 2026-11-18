@@ -84,7 +84,7 @@ window.SCENARIO_INDEX=[
 "depth_in": 3.25,
 "dist": "SCS Type II",
 "kind": "rain",
-"available": false
+"available": true
 },
 {
 "id": "5yr-24-hr",
