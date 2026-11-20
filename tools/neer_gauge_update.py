@@ -59,8 +59,18 @@ for lid, cfg in NWS.items():
 if changes:
     api('POST', f'/layers/{NOAA_LAYER}/edits', {'changes': changes})
 
-now = int(time.time() * 1000)
+# USGS: NEER's own fetch only works for gauges NOAA also tracks, so push readings straight from USGS.
+DAYS = os.environ.get('USGS_DAYS', '3')
+USGS_API = 'https://api.waterdata.usgs.gov/ogcapi/v0/collections/continuous/items'
 for s in api('GET', f'/sensors?projectId={PROJECT}')['sites']:
-    if s['layerId'] == USGS_LAYER:
-        api('POST', f"/sensors/{s['id']}/fetch", {'start': now - 3 * 86400 * 1000, 'end': now})
-        print('USGS', s['externalId'], 'refetch queued')
+    if s['layerId'] != USGS_LAYER: continue
+    for code, measure, unit in (('00065', 'stage', 'ft'), ('00060', 'flow', 'cfs')):
+        url = f"{USGS_API}?f=json&monitoring_location_id=USGS-{s['externalId']}&parameter_code={code}&time=P{DAYS}D&limit=10000"
+        try: feats = get(url).get('features', [])
+        except Exception as e: print('USGS', s['externalId'], code, 'error', e); continue
+        pts = sorted([[ms(f['properties']['time']), float(f['properties']['value'])] for f in feats
+                      if f['properties'].get('value') not in (None, '')])
+        if not pts: continue
+        tok = api('POST', f"/sensors/{s['id']}/readings/upload", {'measure': measure, 'unit': unit, 'points': pts})
+        api('POST', f"/sensors/{s['id']}/readings", {'measure': measure, 'unit': unit, 'inputToken': tok['inputToken']})
+        print('USGS', s['externalId'], measure, len(pts), 'readings')
