@@ -113,17 +113,18 @@ Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_out
   const countyLayer = L.geoJSON(county, {style: {color: '#111', weight: 3.5, fill: false}, interactive: false}).addTo(map);
   map.fitBounds(countyLayer.getBounds(), {padding: [10, 10]});
 
-  // gauges
+  // gauges sit in their own pane above the watershed outlines
+  map.createPane('gauges'); map.getPane('gauges').style.zIndex = 650;
   const usgsLayer = L.layerGroup().addTo(map), noaaLayer = L.layerGroup().addTo(map);
   usgs.features.forEach(f => {
     const p = f.properties, [x, y] = f.geometry.coordinates;
-    const m = L.circleMarker([y, x], {radius: 5, color: '#fff', weight: 1.5, fillColor: '#1d4ed8', fillOpacity: 1}).addTo(usgsLayer);
+    const m = L.circleMarker([y, x], {pane: 'gauges', radius: 5, color: '#fff', weight: 1.5, fillColor: '#1d4ed8', fillOpacity: 1}).addTo(usgsLayer);
     m.bindPopup(`<b>USGS ${p.usgs_id}</b><br>${p.name}<div id="u${p.usgs_id}" class="small">Loading latest reading…</div><a href="${p.usgs_page}" target="_blank">USGS page</a>`);
     m.on('popupopen', () => latestUSGS(p.usgs_id));
   });
   noaa.features.forEach(f => {
     const p = f.properties, [x, y] = f.geometry.coordinates;
-    const m = L.circleMarker([y, x], {radius: p.forecast_point === 'Yes' ? 8 : 6, color: '#fff', weight: 2, fillColor: p.forecast_point === 'Yes' ? '#e11d48' : '#fda4af', fillOpacity: 1}).addTo(noaaLayer);
+    const m = L.circleMarker([y, x], {pane: 'gauges', radius: p.forecast_point === 'Yes' ? 8 : 6, color: '#fff', weight: 2, fillColor: p.forecast_point === 'Yes' ? '#e11d48' : '#fda4af', fillOpacity: 1}).addTo(noaaLayer);
     m.bindPopup(`<b>NOAA ${p.lid}</b><br>${p.name}<div id="n${p.lid}" class="small">Loading status…</div><a href="${p.noaa_page}" target="_blank">NOAA hydrograph</a>`);
     m.on('popupopen', () => statusNOAA(p.lid));
   });
