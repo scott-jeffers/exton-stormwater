@@ -77,7 +77,10 @@ const colorFor = m => m.status === 'In progress' ? css('var(--prog)') : css(PHAS
 const get = u => fetch(u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now()).then(r => r.json());
 
 const map = L.map('map', {zoomControl: true}).setView([39.98, -75.75], 10);
-const light = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {attribution: '&copy; OpenStreetMap, &copy; CARTO', maxZoom: 19}).addTo(map);
+const light = L.layerGroup([
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri, HERE, Garmin, OpenStreetMap', maxZoom: 16}),
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {maxZoom: 16, pane: 'shadowPane'})
+]).addTo(map);
 const imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri World Imagery', maxZoom: 19});
 
 Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_outline.geojson', 'usgs_gauges.geojson', 'noaa_gauges.geojson']
