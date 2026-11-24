@@ -10,7 +10,7 @@
 <style>
 /* ---- Colours for each phase: edit here ---- */
 :root{
-  --done:#2e7d32; --p1:#f59e0b; --p2:#2f80ed; --p3:#8e5cd9; --p4:#9aa5b1; --prog:#0ea5e9;
+  --done:#2e7d32; --p1:#f59e0b; --p2:#2f80ed; --p3:#8e5cd9; --p4:#9aa5b1; --prog:#0ea5e9; --next:#ef6c00;
   --ink:#14213d; --muted:#5b6472; --line:#e3e7ee; --bg:#f6f7fb;
 }
 *{box-sizing:border-box}
@@ -66,14 +66,14 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
 </main>
 <script>
 const PHASES = [
-  {phase:0, label:'Modeled', color:'var(--done)'},
-  {phase:1, label:'Phase 1: pilot (next)', color:'var(--p1)'},
-  {phase:2, label:'Phase 2', color:'var(--p2)'},
-  {phase:3, label:'Phase 3', color:'var(--p3)'},
-  {phase:4, label:'Phase 4', color:'var(--p4)'},
+  {phase:0, label:'Modeled', color:'var(--done)', hideInList:true},
+  {phase:1, label:'Phase 1: Brandywine chain (top-down)', color:'var(--p1)'},
+  {phase:2, label:'Phase 2: Schuylkill towns', color:'var(--p2)'},
+  {phase:3, label:'Phase 3: Christina, eastern creeks, Schuylkill tributaries', color:'var(--p3)'},
+  {phase:4, label:'Phase 4: rural south-west', color:'var(--p4)'},
 ];
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v.replace(/var\((.*)\)/,'$1')).trim() || v;
-const colorFor = m => m.status === 'In progress' ? css('var(--prog)') : css(PHASES.find(p => p.phase === m.phase)?.color || 'var(--p4)');
+const colorFor = m => m.status === 'In progress' ? css('var(--prog)') : m.status === 'Next' ? css('var(--next)') : css(PHASES.find(p => p.phase === m.phase)?.color || 'var(--p4)');
 const get = u => fetch(u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now()).then(r => r.json());
 
 const map = L.map('map', {zoomControl: true}).setView([39.98, -75.75], 10);
@@ -83,8 +83,8 @@ const light = L.layerGroup([
 ]).addTo(map);
 const imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri World Imagery', maxZoom: 19});
 
-Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_outline.geojson', 'usgs_gauges.geojson', 'noaa_gauges.geojson']
-  .map(f => get('data/' + f))).then(([prog, models, sheds, county, usgs, noaa]) => {
+Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_outline.geojson', 'usgs_gauges.geojson', 'noaa_gauges.geojson', 'flow_links.geojson']
+  .map(f => get('data/' + f))).then(([prog, models, sheds, county, usgs, noaa, links]) => {
   const P = prog.models;
   models.features.forEach(f => Object.assign(f.properties, P[f.properties.model_id] || {}));
   const total = models.features.reduce((s, f) => s + f.properties.sq_mi, 0);
@@ -110,6 +110,15 @@ Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_out
     style: {color: '#1f2937', weight: 2.2, fill: true, fillOpacity: 0},
     onEachFeature: (f, l) => { modelLayers[f.properties.model_id] = l; l.on('click', () => select(f.properties.model_id)); }
   }).addTo(map);
+  // arrows: which model feeds which (top-down build order)
+  const flowLayer = L.layerGroup().addTo(map);
+  links.features.forEach(f => {
+    const ll = f.geometry.coordinates.map(([x, y]) => [y, x]);
+    L.polyline(ll, {color: '#111', weight: 2.5, dashArray: '6 4', interactive: false}).addTo(flowLayer);
+    const [a, b] = ll, ang = Math.atan2(b[0] - a[0], b[1] - a[1]) * 180 / Math.PI;
+    L.marker(b, {interactive: false, icon: L.divIcon({className: '', iconSize: [18, 18], iconAnchor: [9, 9],
+      html: `<div style="transform:rotate(${-ang}deg);font-size:18px;line-height:18px;color:#111">&#10148;</div>`})}).addTo(flowLayer);
+  });
   const countyLayer = L.geoJSON(county, {style: {color: '#111', weight: 3.5, fill: false}, interactive: false}).addTo(map);
   map.fitBounds(countyLayer.getBounds(), {padding: [10, 10]});
 
@@ -129,26 +138,28 @@ Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_out
     m.on('popupopen', () => statusNOAA(p.lid));
   });
   L.control.layers({'Light map': light, 'Imagery': imagery},
-    {'Watersheds by status': shedLayer, 'Planned model outlines': modelLayer, 'County line': countyLayer, 'USGS gauges': usgsLayer, 'NOAA river gauges': noaaLayer},
+    {'Watersheds by status': shedLayer, 'Planned model outlines': modelLayer, 'Flow between models': flowLayer, 'County line': countyLayer, 'USGS gauges': usgsLayer, 'NOAA river gauges': noaaLayer},
     {collapsed: true}).addTo(map);
 
   const legend = L.control({position: 'bottomright'});
   legend.onAdd = () => { const d = L.DomUtil.create('div', 'legend');
     d.innerHTML = PHASES.map(p => `<div><span class="sw" style="background:${css(p.color)}"></span>${p.label}</div>`).join('') +
       `<div><span class="sw" style="background:${css('var(--prog)')}"></span>In progress</div>` +
+      `<div><span class="sw" style="background:${css('var(--next)')}"></span>Next</div>` +
+      `<div>&#10148; feeds the next model</div>` +
       `<div><span class="dot" style="background:#1d4ed8"></span>USGS gauge</div><div><span class="dot" style="background:#e11d48"></span>NOAA forecast point</div>`;
     return d; };
   legend.addTo(map);
 
   // side list grouped by phase
   const list = document.getElementById('list');
-  PHASES.forEach(ph => {
-    const ms = models.features.map(f => f.properties).filter(p => p.phase === ph.phase).sort((a, b) => a.model_id.localeCompare(b.model_id));
+  PHASES.filter(ph => !ph.hideInList).forEach(ph => {
+    const ms = models.features.map(f => f.properties).filter(p => p.phase === ph.phase || (ph.phase === 1 && p.phase === 0)).sort((a, b) => a.build_order - b.build_order);
     if (!ms.length) return;
     list.insertAdjacentHTML('beforeend', `<h2>${ph.label} · ${ms.reduce((s, p) => s + p.sq_mi, 0).toFixed(0)} sq mi</h2>`);
     ms.forEach(p => list.insertAdjacentHTML('beforeend',
       `<div class="model" data-id="${p.model_id}"><span class="sw" style="background:${colorFor(p)}"></span><div>` +
-      `<div class="n">${p.model}<span class="tag">${p.sq_mi} sq mi</span></div><div class="m">${p.towns}</div></div></div>`));
+      `<div class="n"><span class="tag" style="margin:0 6px 0 0">#${p.build_order}</span>${p.model}<span class="tag">${p.sq_mi} sq mi</span>${p.status !== 'Planned' ? `<span class="tag" style="background:${colorFor(p)};color:#fff">${p.status}</span>` : ''}</div><div class="m">${p.towns}</div></div></div>`));
   });
   list.querySelectorAll('.model').forEach(el => el.onclick = () => select(el.dataset.id));
 
@@ -161,6 +172,7 @@ Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_out
     const d = document.getElementById('detail'); d.style.display = 'block';
     d.innerHTML = `<h3>${p.model}</h3><div class="small">${p.model_id} · ${p.status} · ${p.phase === 0 ? 'Done' : 'Phase ' + p.phase}</div>` +
       `<p>${p.notes}</p><table class="small"><tr><td>Area</td><td><b>${p.sq_mi} sq mi</b> (${p.watersheds} HUC-12)</td></tr>` +
+      `<tr><td>Build order</td><td><b>#${p.build_order}</b></td></tr><tr><td>Inflow from</td><td>${p.inflow_from}</td></tr><tr><td>Drains to</td><td>${p.drains_to}</td></tr>` +
       `<tr><td>Towns</td><td>${p.towns}</td></tr><tr><td>Gauges</td><td>${p.usgs_gauges} USGS, ${p.noaa_forecast_points} NOAA forecast</td></tr></table>` +
       (p.dashboard ? `<p><a href="${p.dashboard}" target="_blank"><b>Open the flood dashboard</b></a></p>` : '');
   }
