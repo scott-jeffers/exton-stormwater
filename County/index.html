@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chester County Flood Program</title>
+<link rel="icon" href="../Dashboard/favicon.svg?v=1" type="image/svg+xml">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* ---- Colours for each phase: edit here ---- */
+:root{
+  --done:#2e7d32; --p1:#f59e0b; --p2:#2f80ed; --p3:#8e5cd9; --p4:#9aa5b1; --prog:#0ea5e9;
+  --ink:#14213d; --muted:#5b6472; --line:#e3e7ee; --bg:#f6f7fb;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{display:flex;align-items:center;gap:18px;padding:10px 16px;background:var(--ink);color:#fff;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:650}
+header .sub{font-size:12px;opacity:.75}
+.kpis{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
+.kpi{background:rgba(255,255,255,.08);border-radius:8px;padding:5px 12px;text-align:center;min-width:110px}
+.kpi b{display:block;font-size:18px}
+.kpi span{font-size:11px;opacity:.8}
+main{display:grid;grid-template-columns:360px 1fr;height:calc(100% - 64px)}
+aside{overflow:auto;background:#fff;border-right:1px solid var(--line);padding:12px}
+#map{height:100%}
+.bar{height:10px;background:#e8ebf1;border-radius:6px;overflow:hidden;margin:4px 0 2px}
+.bar i{display:block;height:100%;background:var(--done)}
+.small{font-size:12px;color:var(--muted)}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:16px 0 6px}
+.model{display:flex;gap:8px;align-items:flex-start;padding:7px 8px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+.model:hover,.model.sel{background:#f1f5ff;border-color:#d5e1ff}
+.sw{width:12px;height:12px;border-radius:3px;margin-top:3px;flex:none}
+.model .n{font-weight:600}
+.model .m{font-size:12px;color:var(--muted)}
+.tag{font-size:11px;padding:1px 6px;border-radius:10px;background:#eef1f6;color:#374151;margin-left:4px;white-space:nowrap}
+#detail{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:6px;display:none;background:#fbfcff}
+#detail h3{margin:0 0 4px;font-size:15px}
+#detail a{color:#1d4ed8}
+.legend{background:#fff;padding:8px 10px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.2);font-size:12px;line-height:1.7}
+.legend .sw{display:inline-block;vertical-align:-1px;margin-right:6px;margin-top:0}
+.legend .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:2px solid #fff;box-shadow:0 0 0 1px #999}
+.leaflet-popup-content{font-size:13px;min-width:220px}
+.leaflet-popup-content table{border-collapse:collapse}
+.leaflet-popup-content td{padding:1px 6px 1px 0}
+@media (max-width:800px){main{grid-template-columns:1fr;grid-template-rows:45% 55%}aside{order:2}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Chester County Flood Program</h1><div class="sub">Which watersheds have flood models, which are next, and the plan for the rest</div></div>
+  <div class="kpis" id="kpis"></div>
+</header>
+<main>
+  <aside>
+    <div class="small">Area modeled</div>
+    <div class="bar"><i id="barDone"></i></div>
+    <div class="small" id="barText"></div>
+    <div id="detail"></div>
+    <div id="list"></div>
+    <h2>Edit this dashboard</h2>
+    <div class="small">Model status lives in <code>County/data/program.json</code>: change a model's <code>status</code>, <code>phase</code>, <code>notes</code> or <code>dashboard</code> link, commit, and the map updates. Phase colours are at the top of <code>index.html</code>.</div>
+  </aside>
+  <div id="map"></div>
+</main>
+<script>
+const PHASES = [
+  {phase:0, label:'Modeled', color:'var(--done)'},
+  {phase:1, label:'Phase 1: pilot (next)', color:'var(--p1)'},
+  {phase:2, label:'Phase 2', color:'var(--p2)'},
+  {phase:3, label:'Phase 3', color:'var(--p3)'},
+  {phase:4, label:'Phase 4', color:'var(--p4)'},
+];
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v.replace(/var\((.*)\)/,'$1')).trim() || v;
+const colorFor = m => m.status === 'In progress' ? css('var(--prog)') : css(PHASES.find(p => p.phase === m.phase)?.color || 'var(--p4)');
+const get = u => fetch(u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now()).then(r => r.json());
+
+const map = L.map('map', {zoomControl: true}).setView([39.98, -75.75], 10);
+const light = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {attribution: '&copy; OpenStreetMap, &copy; CARTO', maxZoom: 19}).addTo(map);
+const imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri World Imagery', maxZoom: 19});
+
+Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_outline.geojson', 'usgs_gauges.geojson', 'noaa_gauges.geojson']
+  .map(f => get('data/' + f))).then(([prog, models, sheds, county, usgs, noaa]) => {
+  const P = prog.models;
+  models.features.forEach(f => Object.assign(f.properties, P[f.properties.model_id] || {}));
+  const total = models.features.reduce((s, f) => s + f.properties.sq_mi, 0);
+  const doneSq = models.features.filter(f => f.properties.phase === 0).reduce((s, f) => s + f.properties.sq_mi, 0);
+  const nDone = models.features.filter(f => f.properties.phase === 0).length;
+  const nFc = noaa.features.filter(f => f.properties.forecast_point === 'Yes').length;
+  document.getElementById('kpis').innerHTML =
+    `<div class="kpi"><b>${nDone} of ${models.features.length}</b><span>models done</span></div>` +
+    `<div class="kpi"><b>${doneSq.toFixed(0)} / ${total.toFixed(0)}</b><span>sq mi modeled</span></div>` +
+    `<div class="kpi"><b>${usgs.features.length}</b><span>USGS gauges</span></div>` +
+    `<div class="kpi"><b>${nFc}</b><span>NOAA forecast points</span></div>`;
+  document.getElementById('barDone').style.width = (doneSq / total * 100).toFixed(1) + '%';
+  document.getElementById('barText').textContent = `${(doneSq / total * 100).toFixed(1)}% of ${total.toFixed(0)} sq mi`;
+
+  // watersheds filled by their model's status
+  const byId = {}; models.features.forEach(f => byId[f.properties.model_id] = f.properties);
+  const shedLayer = L.geoJSON(sheds, {
+    style: f => ({color: '#fff', weight: 1, fillColor: colorFor(byId[f.properties.model_id]), fillOpacity: .55}),
+    onEachFeature: (f, l) => l.bindTooltip(`${f.properties.watershed} (${f.properties.sq_mi} sq mi)<br><b>${byId[f.properties.model_id].model}</b>`, {sticky: true})
+  }).addTo(map);
+  const modelLayers = {};
+  const modelLayer = L.geoJSON(models, {
+    style: {color: '#1f2937', weight: 2.2, fill: true, fillOpacity: 0},
+    onEachFeature: (f, l) => { modelLayers[f.properties.model_id] = l; l.on('click', () => select(f.properties.model_id)); }
+  }).addTo(map);
+  const countyLayer = L.geoJSON(county, {style: {color: '#111', weight: 3.5, fill: false}, interactive: false}).addTo(map);
+  map.fitBounds(countyLayer.getBounds(), {padding: [10, 10]});
+
+  // gauges
+  const usgsLayer = L.layerGroup().addTo(map), noaaLayer = L.layerGroup().addTo(map);
+  usgs.features.forEach(f => {
+    const p = f.properties, [x, y] = f.geometry.coordinates;
+    const m = L.circleMarker([y, x], {radius: 5, color: '#fff', weight: 1.5, fillColor: '#1d4ed8', fillOpacity: 1}).addTo(usgsLayer);
+    m.bindPopup(`<b>USGS ${p.usgs_id}</b><br>${p.name}<div id="u${p.usgs_id}" class="small">Loading latest reading…</div><a href="${p.usgs_page}" target="_blank">USGS page</a>`);
+    m.on('popupopen', () => latestUSGS(p.usgs_id));
+  });
+  noaa.features.forEach(f => {
+    const p = f.properties, [x, y] = f.geometry.coordinates;
+    const m = L.circleMarker([y, x], {radius: p.forecast_point === 'Yes' ? 8 : 6, color: '#fff', weight: 2, fillColor: p.forecast_point === 'Yes' ? '#e11d48' : '#fda4af', fillOpacity: 1}).addTo(noaaLayer);
+    m.bindPopup(`<b>NOAA ${p.lid}</b><br>${p.name}<div id="n${p.lid}" class="small">Loading status…</div><a href="${p.noaa_page}" target="_blank">NOAA hydrograph</a>`);
+    m.on('popupopen', () => statusNOAA(p.lid));
+  });
+  L.control.layers({'Light map': light, 'Imagery': imagery},
+    {'Watersheds by status': shedLayer, 'Planned model outlines': modelLayer, 'County line': countyLayer, 'USGS gauges': usgsLayer, 'NOAA river gauges': noaaLayer},
+    {collapsed: true}).addTo(map);
+
+  const legend = L.control({position: 'bottomright'});
+  legend.onAdd = () => { const d = L.DomUtil.create('div', 'legend');
+    d.innerHTML = PHASES.map(p => `<div><span class="sw" style="background:${css(p.color)}"></span>${p.label}</div>`).join('') +
+      `<div><span class="sw" style="background:${css('var(--prog)')}"></span>In progress</div>` +
+      `<div><span class="dot" style="background:#1d4ed8"></span>USGS gauge</div><div><span class="dot" style="background:#e11d48"></span>NOAA forecast point</div>`;
+    return d; };
+  legend.addTo(map);
+
+  // side list grouped by phase
+  const list = document.getElementById('list');
+  PHASES.forEach(ph => {
+    const ms = models.features.map(f => f.properties).filter(p => p.phase === ph.phase).sort((a, b) => a.model_id.localeCompare(b.model_id));
+    if (!ms.length) return;
+    list.insertAdjacentHTML('beforeend', `<h2>${ph.label} · ${ms.reduce((s, p) => s + p.sq_mi, 0).toFixed(0)} sq mi</h2>`);
+    ms.forEach(p => list.insertAdjacentHTML('beforeend',
+      `<div class="model" data-id="${p.model_id}"><span class="sw" style="background:${colorFor(p)}"></span><div>` +
+      `<div class="n">${p.model}<span class="tag">${p.sq_mi} sq mi</span></div><div class="m">${p.towns}</div></div></div>`));
+  });
+  list.querySelectorAll('.model').forEach(el => el.onclick = () => select(el.dataset.id));
+
+  function select(id) {
+    const p = byId[id], l = modelLayers[id];
+    Object.values(modelLayers).forEach(x => x.setStyle({weight: 2.2, color: '#1f2937'}));
+    l.setStyle({weight: 5, color: '#111'}); l.bringToFront();
+    map.fitBounds(l.getBounds(), {padding: [30, 30]});
+    document.querySelectorAll('.model').forEach(e => e.classList.toggle('sel', e.dataset.id === id));
+    const d = document.getElementById('detail'); d.style.display = 'block';
+    d.innerHTML = `<h3>${p.model}</h3><div class="small">${p.model_id} · ${p.status} · ${p.phase === 0 ? 'Done' : 'Phase ' + p.phase}</div>` +
+      `<p>${p.notes}</p><table class="small"><tr><td>Area</td><td><b>${p.sq_mi} sq mi</b> (${p.watersheds} HUC-12)</td></tr>` +
+      `<tr><td>Towns</td><td>${p.towns}</td></tr><tr><td>Gauges</td><td>${p.usgs_gauges} USGS, ${p.noaa_forecast_points} NOAA forecast</td></tr></table>` +
+      (p.dashboard ? `<p><a href="${p.dashboard}" target="_blank"><b>Open the flood dashboard</b></a></p>` : '');
+  }
+});
+
+function latestUSGS(id) {
+  const el = () => document.getElementById('u' + id);
+  fetch(`https://api.waterdata.usgs.gov/ogcapi/v0/collections/latest-continuous/items?f=json&monitoring_location_id=USGS-${id}&limit=20`)
+    .then(r => r.json()).then(j => {
+      const v = {}; j.features.forEach(f => v[f.properties.parameter_code] = f.properties);
+      const s = v['00065'], q = v['00060'];
+      if (el()) el().innerHTML = (s ? `Stage <b>${s.value} ft</b>` : '') + (q ? ` · Flow <b>${q.value} cfs</b>` : '') +
+        ((s || q) ? `<br>${new Date((s || q).time).toLocaleString()}` : 'No recent reading');
+    }).catch(() => { if (el()) el().textContent = 'Could not reach USGS'; });
+}
+function statusNOAA(lid) {
+  const el = () => document.getElementById('n' + lid);
+  fetch(`https://api.water.noaa.gov/nwps/v1/gauges/${lid}`).then(r => r.json()).then(g => {
+    const o = g.status?.observed, f = g.status?.forecast;
+    const fmt = x => x && x.primary > -999 ? `${x.primary} ${x.primaryUnit} (${x.floodCategory === 'no_flooding' ? 'no flooding' : x.floodCategory})` : 'none';
+    if (el()) el().innerHTML = `Now: <b>${fmt(o)}</b><br>Forecast crest: <b>${fmt(f)}</b>`;
+  }).catch(() => { if (el()) el().textContent = 'Could not reach NOAA'; });
+}
+</script>
+</body>
+</html>

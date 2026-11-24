@@ -1,0 +1,133 @@
+{
+  "_how_to_edit": "Change status/phase/notes here; the map updates on reload. status: Modeled | Pilot - next | Planned | In progress. phase: 0 = done, 1..4 = planned phase. dashboard: link shown when a model is live.",
+  "models": {
+    "M01": {
+      "model": "Valley Creek (Exton)",
+      "status": "Modeled",
+      "phase": 0,
+      "towns": "Exton, West Whiteland, Downingtown (west)",
+      "notes": "HEC-RAS 2D with storm sewers; 9 design storms run; live EOC dashboard.",
+      "dashboard": "https://scott-jeffers.github.io/exton-stormwater/"
+    },
+    "M02": {
+      "model": "East Branch Brandywine - Downingtown",
+      "status": "Pilot - next",
+      "phase": 1,
+      "towns": "Downingtown, Uwchlan, East Caln",
+      "notes": "Pilot: NOAA forecast gauge (DWNP1), borough storm sewers, Ida 2021 high-water marks for calibration.",
+      "dashboard": ""
+    },
+    "M03": {
+      "model": "Upper East Branch Brandywine & Marsh Creek",
+      "status": "Planned",
+      "phase": 2,
+      "towns": "Honey Brook, Wallace, Upper Uwchlan",
+      "notes": "Feeds the pilot area; Marsh Creek dam outflow as a boundary.",
+      "dashboard": ""
+    },
+    "M04": {
+      "model": "West Branch Brandywine - Coatesville",
+      "status": "Planned",
+      "phase": 2,
+      "towns": "Coatesville, Caln, Valley, Modena",
+      "notes": "Dense city on the creek; repeat flooding; storm sewers in Coatesville.",
+      "dashboard": ""
+    },
+    "M05": {
+      "model": "Brandywine main stem - Chadds Ford",
+      "status": "Planned",
+      "phase": 2,
+      "towns": "West Chester (east), Pocopson, Chadds Ford",
+      "notes": "Riverine model with inflows from both branches; USGS Chadds Ford gauge.",
+      "dashboard": ""
+    },
+    "M06": {
+      "model": "French Creek - Phoenixville",
+      "status": "Planned",
+      "phase": 2,
+      "towns": "Phoenixville, Kimberton, Warwick",
+      "notes": "Phoenixville borough at the Schuylkill confluence; Schuylkill backwater as boundary.",
+      "dashboard": ""
+    },
+    "M07": {
+      "model": "Valley Creek (Valley Forge) & Schuylkill frontage",
+      "status": "Planned",
+      "phase": 2,
+      "towns": "Tredyffrin, Malvern, Schuylkill Twp",
+      "notes": "The other Valley Creek (Paoli to Valley Forge) plus Chester County side of the Schuylkill below Phoenixville.",
+      "dashboard": ""
+    },
+    "M08": {
+      "model": "Pickering Creek",
+      "status": "Planned",
+      "phase": 3,
+      "towns": "Charlestown, West Vincent, Schuylkill Twp",
+      "notes": "Mostly rural; Pickering reservoir.",
+      "dashboard": ""
+    },
+    "M09": {
+      "model": "White Clay Creek",
+      "status": "Planned",
+      "phase": 3,
+      "towns": "Avondale, West Grove, London Grove, Landenberg",
+      "notes": "Wild and Scenic river; boroughs of Avondale and West Grove.",
+      "dashboard": ""
+    },
+    "M10": {
+      "model": "Red Clay Creek",
+      "status": "Planned",
+      "phase": 3,
+      "towns": "Kennett Square, Kennett",
+      "notes": "Kennett Square borough; drains to Delaware.",
+      "dashboard": ""
+    },
+    "M11": {
+      "model": "Eastern creeks - Chester, Ridley, Crum, Darby",
+      "status": "Planned",
+      "phase": 3,
+      "towns": "West Chester, Malvern, Paoli, Berwyn",
+      "notes": "Headwaters only (creeks flow into Delaware County); West Chester borough sewers.",
+      "dashboard": ""
+    },
+    "M12": {
+      "model": "Buck Run & Doe Run",
+      "status": "Planned",
+      "phase": 4,
+      "towns": "Parkesburg, Sadsbury, Highland",
+      "notes": "Rural; Parkesburg borough.",
+      "dashboard": ""
+    },
+    "M13": {
+      "model": "Octoraro Creek",
+      "status": "Planned",
+      "phase": 4,
+      "towns": "Atglen, Oxford (north), Lower Oxford",
+      "notes": "Rural south-west; Susquehanna basin.",
+      "dashboard": ""
+    },
+    "M14": {
+      "model": "Elk Creeks",
+      "status": "Planned",
+      "phase": 4,
+      "towns": "Oxford, Elk, Lower Oxford",
+      "notes": "Big Elk, Little Elk and North East Creeks; drain to Chesapeake.",
+      "dashboard": ""
+    },
+    "M15": {
+      "model": "Northern Schuylkill tributaries",
+      "status": "Planned",
+      "phase": 4,
+      "towns": "North Coventry, East Coventry, South Coventry",
+      "notes": "Pigeon Creek, Sprogles Run, Sixpenny Creek; Pottstown area across the river.",
+      "dashboard": ""
+    },
+    "M16": {
+      "model": "Pequea & Conestoga headwaters",
+      "status": "Planned",
+      "phase": 4,
+      "towns": "Honey Brook (west), West Sadsbury",
+      "notes": "Small slivers at the Lancaster line.",
+      "dashboard": ""
+    }
+  }
+}
