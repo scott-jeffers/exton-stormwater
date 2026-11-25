@@ -42,6 +42,14 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
 .legend .sw{display:inline-block;vertical-align:-1px;margin-right:6px;margin-top:0}
 .legend .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:2px solid #fff;box-shadow:0 0 0 1px #999}
 .leaflet-popup-content{font-size:13px;min-width:220px}
+.study{padding:7px 8px;border-radius:8px;border:1px solid var(--line);margin:6px 0;cursor:pointer;background:#fff}
+.study:hover{background:#f8fafc}
+.study .t{font-weight:600}
+.stype{display:inline-block;font-size:10px;font-weight:700;color:#fff;border-radius:4px;padding:1px 5px;margin-right:6px;vertical-align:1px}
+.filters{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+.filters button{font:12px system-ui;border:1px solid var(--line);background:#fff;border-radius:12px;padding:2px 9px;cursor:pointer}
+.filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sq{display:inline-block;width:11px;height:11px;transform:rotate(45deg);margin-right:7px;vertical-align:0;border:1.5px solid #fff;box-shadow:0 0 0 1px #888}
 .leaflet-popup-content table{border-collapse:collapse}
 .leaflet-popup-content td{padding:1px 6px 1px 0}
 @media (max-width:800px){main{grid-template-columns:1fr;grid-template-rows:45% 55%}aside{order:2}}
@@ -59,8 +67,12 @@ h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
     <div class="small" id="barText"></div>
     <div id="detail"></div>
     <div id="list"></div>
+    <h2>Studies, plans, RFPs &amp; grants</h2>
+    <div class="small">Other flood work in the county: what it found, and what it means for our models. Click one to see where it is.</div>
+    <div class="filters" id="sfilters"></div>
+    <div id="studies"></div>
     <h2>Edit this dashboard</h2>
-    <div class="small">Model status lives in <code>County/data/program.json</code>: change a model's <code>status</code>, <code>phase</code>, <code>notes</code> or <code>dashboard</code> link, commit, and the map updates. Phase colours are at the top of <code>index.html</code>.</div>
+    <div class="small">Studies live in <code>County/data/studies.json</code>. Model status lives in <code>County/data/program.json</code>: change a model's <code>status</code>, <code>phase</code>, <code>notes</code> or <code>dashboard</code> link, commit, and the map updates. Phase colours are at the top of <code>index.html</code>.</div>
   </aside>
   <div id="map"></div>
 </main>
@@ -74,6 +86,7 @@ const PHASES = [
 ];
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v.replace(/var\((.*)\)/,'$1')).trim() || v;
 const colorFor = m => m.status === 'In progress' ? css('var(--prog)') : m.status === 'Next' ? css('var(--next)') : css(PHASES.find(p => p.phase === m.phase)?.color || 'var(--p4)');
+const STYPE = {Study: '#0f766e', RFP: '#c2410c', Plan: '#6d28d9', Grant: '#ca8a04'};
 const get = u => fetch(u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now()).then(r => r.json());
 
 const map = L.map('map', {zoomControl: true}).setView([39.98, -75.75], 10);
@@ -83,8 +96,8 @@ const light = L.layerGroup([
 ]).addTo(map);
 const imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri World Imagery', maxZoom: 19});
 
-Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_outline.geojson', 'usgs_gauges.geojson', 'noaa_gauges.geojson', 'flow_links.geojson']
-  .map(f => get('data/' + f))).then(([prog, models, sheds, county, usgs, noaa, links]) => {
+Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_outline.geojson', 'usgs_gauges.geojson', 'noaa_gauges.geojson', 'flow_links.geojson', 'studies.json']
+  .map(f => get('data/' + f))).then(([prog, models, sheds, county, usgs, noaa, links, studies]) => {
   const P = prog.models;
   models.features.forEach(f => Object.assign(f.properties, P[f.properties.model_id] || {}));
   const total = models.features.reduce((s, f) => s + f.properties.sq_mi, 0);
@@ -95,7 +108,8 @@ Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_out
     `<div class="kpi"><b>${nDone} of ${models.features.length}</b><span>models done</span></div>` +
     `<div class="kpi"><b>${doneSq.toFixed(0)} / ${total.toFixed(0)}</b><span>sq mi modeled</span></div>` +
     `<div class="kpi"><b>${usgs.features.length}</b><span>USGS gauges</span></div>` +
-    `<div class="kpi"><b>${nFc}</b><span>NOAA forecast points</span></div>`;
+    `<div class="kpi"><b>${nFc}</b><span>NOAA forecast points</span></div>` +
+    `<div class="kpi"><b>${studies.items.length}</b><span>studies, plans &amp; RFPs</span></div>`;
   document.getElementById('barDone').style.width = (doneSq / total * 100).toFixed(1) + '%';
   document.getElementById('barText').textContent = `${(doneSq / total * 100).toFixed(1)}% of ${total.toFixed(0)} sq mi`;
 
@@ -137,8 +151,41 @@ Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_out
     m.bindPopup(`<b>NOAA ${p.lid}</b><br>${p.name}<div id="n${p.lid}" class="small">Loading status…</div><a href="${p.noaa_page}" target="_blank">NOAA hydrograph</a>`);
     m.on('popupopen', () => statusNOAA(p.lid));
   });
+  // studies, plans, RFPs and grants
+  const studyLayer = L.layerGroup().addTo(map), studyMarkers = {};
+  const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const studyHtml = it => `<span class="stype" style="background:${STYPE[it.type]}">${it.type}</span><b>${esc(it.title)}</b>` +
+    `<div class="small">${esc(it.org)} · ${esc(it.date)}<br><i>${esc(it.status)}</i></div><p style="margin:6px 0">${esc(it.summary)}</p>` +
+    `<p style="margin:6px 0"><b>For our models:</b> ${esc(it.for_us)}</p>` +
+    `<div class="small">Models: ${it.models.map(m => byId[m] ? byId[m].model : m).join(', ')}</div><a href="${it.url}" target="_blank">Open source document</a>`;
+  studies.items.forEach(it => {
+    if (it.lat == null) return;
+    const m = L.marker([it.lat, it.lon], {pane: 'gauges', icon: L.divIcon({className: '', iconSize: [16, 16], iconAnchor: [8, 8],
+      html: `<div style="width:13px;height:13px;transform:rotate(45deg);background:${STYPE[it.type]};border:2px solid #fff;box-shadow:0 0 0 1px #555"></div>`})}).addTo(studyLayer);
+    m.bindPopup(studyHtml(it), {maxWidth: 340}); studyMarkers[it.id] = m;
+  });
+  let sFilter = 'All';
+  const renderStudies = () => {
+    const box = document.getElementById('studies');
+    box.innerHTML = studies.items.filter(it => sFilter === 'All' || it.type === sFilter).map(it =>
+      `<div class="study" data-sid="${it.id}"><span class="stype" style="background:${STYPE[it.type]}">${it.type}</span><span class="t">${esc(it.title)}</span>` +
+      `<div class="small">${esc(it.date)} · ${esc(it.status)}</div></div>`).join('');
+    box.querySelectorAll('.study').forEach(el => el.onclick = () => openStudy(el.dataset.sid));
+  };
+  const openStudy = sid => {
+    const it = studies.items.find(x => x.id === sid), mk = studyMarkers[sid];
+    if (mk) { map.setView(mk.getLatLng(), Math.max(map.getZoom(), 12)); mk.openPopup(); }
+    else L.popup({maxWidth: 340}).setLatLng(map.getCenter()).setContent(studyHtml(it)).openOn(map);
+  };
+  document.getElementById('sfilters').innerHTML = ['All', ...Object.keys(STYPE)].map(t => `<button data-t="${t}" class="${t === 'All' ? 'on' : ''}">${t}</button>`).join('');
+  document.querySelectorAll('#sfilters button').forEach(b => b.onclick = () => {
+    sFilter = b.dataset.t; document.querySelectorAll('#sfilters button').forEach(x => x.classList.toggle('on', x === b)); renderStudies(); });
+  renderStudies();
+  window._studiesFor = id => studies.items.filter(it => it.models.includes(id) && it.models.length < 10);
+  window._openStudy = openStudy;
+
   L.control.layers({'Light map': light, 'Imagery': imagery},
-    {'Watersheds by status': shedLayer, 'Planned model outlines': modelLayer, 'Flow between models': flowLayer, 'County line': countyLayer, 'USGS gauges': usgsLayer, 'NOAA river gauges': noaaLayer},
+    {'Watersheds by status': shedLayer, 'Planned model outlines': modelLayer, 'Flow between models': flowLayer, 'County line': countyLayer, 'USGS gauges': usgsLayer, 'NOAA river gauges': noaaLayer, 'Studies, plans & RFPs': studyLayer},
     {collapsed: true}).addTo(map);
 
   const legend = L.control({position: 'bottomright'});
@@ -147,7 +194,8 @@ Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_out
       `<div><span class="sw" style="background:${css('var(--prog)')}"></span>In progress</div>` +
       `<div><span class="sw" style="background:${css('var(--next)')}"></span>Next</div>` +
       `<div>&#10148; feeds the next model</div>` +
-      `<div><span class="dot" style="background:#1d4ed8"></span>USGS gauge</div><div><span class="dot" style="background:#e11d48"></span>NOAA forecast point</div>`;
+      `<div><span class="dot" style="background:#1d4ed8"></span>USGS gauge</div><div><span class="dot" style="background:#e11d48"></span>NOAA forecast point</div>` +
+      Object.entries(STYPE).map(([k, c]) => `<div><span class="sq" style="background:${c}"></span>${k}</div>`).join('');
     return d; };
   legend.addTo(map);
 
@@ -174,7 +222,9 @@ Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_out
       `<p>${p.notes}</p><table class="small"><tr><td>Area</td><td><b>${p.sq_mi} sq mi</b> (${p.watersheds} HUC-12)</td></tr>` +
       `<tr><td>Build order</td><td><b>#${p.build_order}</b></td></tr><tr><td>Inflow from</td><td>${p.inflow_from}</td></tr><tr><td>Drains to</td><td>${p.drains_to}</td></tr>` +
       `<tr><td>Towns</td><td>${p.towns}</td></tr><tr><td>Gauges</td><td>${p.usgs_gauges} USGS, ${p.noaa_forecast_points} NOAA forecast</td></tr></table>` +
-      (p.dashboard ? `<p><a href="${p.dashboard}" target="_blank"><b>Open the flood dashboard</b></a></p>` : '');
+      (p.dashboard ? `<p><a href="${p.dashboard}" target="_blank"><b>Open the flood dashboard</b></a></p>` : '') +
+      (() => { const rel = window._studiesFor(id); return rel.length ? `<div class="small" style="margin-top:8px"><b>Related studies, plans &amp; RFPs</b></div>` +
+        rel.map(it => `<div class="small" style="margin:3px 0"><span class="stype" style="background:${STYPE[it.type]}">${it.type}</span><a href="#" onclick="window._openStudy('${it.id}');return false">${it.title}</a></div>`).join('') : ''; })();
   }
 });
 

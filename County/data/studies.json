@@ -1,0 +1,358 @@
+{
+ "_how_to_edit": "One entry per study, plan, RFP or grant. type: Study | RFP | Plan | Grant. models: which model ids it touches. lat/lon: map marker (leave null for county-wide items). for_us: what it means for our program.",
+ "items": [
+  {
+   "id": "S01",
+   "type": "Study",
+   "title": "Brandywine Flood Study (final report)",
+   "org": "Brandywine Conservancy, Chester County Water Resources Authority, University of Delaware Water Resources Center",
+   "date": "2025-04",
+   "status": "Complete",
+   "models": [
+    "M03",
+    "M02",
+    "M12",
+    "M04",
+    "M05",
+    "M01"
+   ],
+   "lat": 39.9925,
+   "lon": -75.689,
+   "url": "https://issuu.com/thebrandywine/docs/brandywine_flood_study_report",
+   "summary": "Watershed-wide study started after Hurricane Ida. TR-55 runoff for 18 subwatersheds; FEMA HEC-RAS (1D) on the main stem, East and West Branches and Beaver Creek. Reviewed 269 bridges, culverts and dams (119 undersized). 16 priority projects: 10 bridge replacements, 4 low-head dam removals, 1 floodplain restoration, Barneston Dam upgrade.",
+   "for_us": "Use Ida high-water marks (18 PA bridges) and gauge peaks to calibrate. Model the 5 flood-control dams properly (Struble, Barneston, Marsh Creek, Beaver Creek, Hibernia). Their gaps we fill: models for only 122 of 269 structures, no storm sewers, Buck Run and Sucker Run not analysed, subwatershed scale only. All 12 PA priority projects fall inside M02, M03, M04, M05."
+  },
+  {
+   "id": "S02",
+   "type": "Study",
+   "title": "Brandywine Flood Study - Technical Compendium (Sections 1-12)",
+   "org": "Brandywine Conservancy / CCWRA / UD WRC",
+   "date": "2025-04",
+   "status": "Complete",
+   "models": [
+    "M03",
+    "M02",
+    "M12",
+    "M04",
+    "M05"
+   ],
+   "lat": null,
+   "lon": null,
+   "url": "https://www.brandywine.org/conservancy/brandywine-flood-study",
+   "summary": "Supporting sections: H&H methods (Sec. 5), bridge/culvert/dam analyses (Sec. 8), climate factors (+8 to 12% Atlas 14), build-out analysis, municipal reports, stormwater assessments.",
+   "for_us": "Section 8 structure list to cross-check against our culverts; Section 3 climate factors for a future-rainfall scenario. Models and data available from CCWRA on request."
+  },
+  {
+   "id": "R01",
+   "type": "RFP",
+   "title": "Downingtown: Flood Mitigation Planning, Engineering Analysis & Project Prioritization Study",
+   "org": "Borough of Downingtown",
+   "date": "2026-05",
+   "status": "Awarded to GEI Consultants (~$280,600); optional 2D modeling add-on not selected",
+   "models": [
+    "M02"
+   ],
+   "lat": 40.0065,
+   "lon": -75.7033,
+   "url": "https://www.downingtown.org/DocumentCenter/View/662/RFP-Flood-Mitigation-Planning-Engineering-Analysis-and-Project-Prioritization-Study-5-6-26",
+   "summary": "Base budget up to $300k: 10 capital projects (5 from the Borough list + 5 new), HEC-HMS/RAS for 10/25/50/100-yr and Ida, concept drawings, costs, ranking. Optional Task 8 (up to $75k): 2D model built for real-time flood mapping and warning. Due May 29, 2026.",
+   "for_us": "The 2D / real-time add-on was not bought: that is what M02 plus the EOC dashboard already is. Offer the model to the Borough or to GEI for their 10-project analysis and Ida comparison."
+  },
+  {
+   "id": "P01",
+   "type": "Plan",
+   "title": "Downingtown Flood Advisory Committee - project ideas",
+   "org": "Borough of Downingtown Flood Advisory Committee",
+   "date": "2024",
+   "status": "Ongoing",
+   "models": [
+    "M02"
+   ],
+   "lat": 40.005,
+   "lon": -75.708,
+   "url": "https://www.downingtown.org/DocumentCenter/View/665",
+   "summary": "Borough candidate list: Johnsontown swale, Creek Walk floodplain bench, outfall angle change, Mary Street wetlands (buyout land on Beaver Creek), Lloyd Ave bridge clearing, Copeland Run storage at old water-authority site, crest gates, more stream gauges.",
+   "for_us": "Run each as a with-project scenario in M02 once the dams are fixed."
+  },
+  {
+   "id": "G01",
+   "type": "Grant",
+   "title": "Downingtown LSA grant - Beaver Creek / Mary Street / west end flood design",
+   "org": "Borough of Downingtown",
+   "date": "2026",
+   "status": "Awarded ($375,000)",
+   "models": [
+    "M02"
+   ],
+   "lat": 40.004,
+   "lon": -75.7135,
+   "url": "https://citizenportal.ai/articles/9750332/Pennsylvania/Chester-County/Downingtown/Flood-Advisory-Committee-advances-draft-RFP-and-folds-375000-LSA-grant-into-study-scope",
+   "summary": "Design money for a flood mitigation project on Beaver Creek at Mary Street and the west end, folded into the Borough flood study.",
+   "for_us": "Mary Street is the flood epicentre on Beaver Creek; our 2D model can show the effect of the design."
+  },
+  {
+   "id": "G02",
+   "type": "Grant",
+   "title": "Coatesville FEMA Flood Mitigation Assistance - Gibbons Run culvert",
+   "org": "City of Coatesville / Cedarville Engineering",
+   "date": "2023-07",
+   "status": "Scoping and design underway (~$9M construction estimate)",
+   "models": [
+    "M04"
+   ],
+   "lat": 39.9832,
+   "lon": -75.8238,
+   "url": "https://coatesville.org/?p=33869",
+   "summary": "$621,360 FEMA FMA grant to design and engineer flood resilience; Gibbons Run culvert under Ash Park identified as the main choke point in a city-wide stormwater assessment.",
+   "for_us": "M04 includes Coatesville storm pipes and Gibbons Run; offer 2D results for the design and the FEMA benefit-cost case."
+  },
+  {
+   "id": "S03",
+   "type": "Study",
+   "title": "White Clay Creek Flood Study",
+   "org": "White Clay Watershed Association and Drexel University",
+   "date": "2025-2027",
+   "status": "In progress (future-storm scenarios, Avondale case study; reporting winter 2027)",
+   "models": [
+    "M09"
+   ],
+   "lat": 39.8237,
+   "lon": -75.7835,
+   "url": "https://www.whiteclay.org/flood-study",
+   "summary": "Detailed watershed flood model for White Clay Creek after repeated evacuations in Avondale; system-dynamics scenario planning with local decision-makers.",
+   "for_us": "Coordinate before building M09: compare models, share Ida results, avoid duplicate work. Possible partnership for a 2D/real-time layer."
+  },
+  {
+   "id": "S04",
+   "type": "Study",
+   "title": "Goose Creek Flood Study (West Chester)",
+   "org": "Borough of West Chester / Remington & Vernick Engineers",
+   "date": "2025-07",
+   "status": "Awarded ($38,500)",
+   "models": [
+    "M11"
+   ],
+   "lat": 39.9585,
+   "lon": -75.597,
+   "url": "https://pa-westchester.civicplus.com/AgendaCenter/ViewFile/Agenda/_07152025-2056",
+   "summary": "Comprehensive study of recurring east-side flooding on Goose Creek (Chester Creek headwaters). Goose Creek Alliance also released a Watershed Action Plan in 2025.",
+   "for_us": "Goose Creek drains to Chester Creek in M11. Small study budget; our 2D model with storm sewers would add depth. Contact the Borough and Goose Creek Alliance."
+  },
+  {
+   "id": "P02",
+   "type": "Plan",
+   "title": "Willistown Township Stormwater Master Plan",
+   "org": "Willistown Township / HRG",
+   "date": "2023-2024",
+   "status": "Complete",
+   "models": [
+    "M11"
+   ],
+   "lat": 40.015,
+   "lon": -75.5,
+   "url": "https://www.willistown.pa.us/DocumentCenter/View/2743",
+   "summary": "Township-wide stormwater and flooding study with a list of flood mitigation projects (Ridley, Crum and Little Valley Creek watersheds).",
+   "for_us": "Project list and problem areas to check in M11 (Ridley/Crum) and M07 (Little Valley Creek)."
+  },
+  {
+   "id": "R02",
+   "type": "RFP",
+   "title": "Delaware County countywide Act 167 Stormwater Management Plan",
+   "org": "Delaware County Planning Department",
+   "date": "2025-03",
+   "status": "Phase 1 scope complete (Aug 2024); consultant RFP March 2025",
+   "models": [
+    "M11",
+    "M05"
+   ],
+   "lat": 39.918,
+   "lon": -75.388,
+   "url": "https://delcopa.gov/purchasing/bidsprops/ENGINEERINGCONSULTANTSERVICES_ECS-ACT167STORMWATERMANAGEMENTPLAN_eDPL-030425-1.pdf",
+   "summary": "Countywide Act 167 plan covering Chester, Ridley, Crum, Darby and Brandywine watersheds on the Delaware County side.",
+   "for_us": "Downstream of M11 and M05; their hydrology and our 2D results should line up at the county line."
+  },
+  {
+   "id": "P03",
+   "type": "Plan",
+   "title": "Chester County Hazard Mitigation Plan (2026 update)",
+   "org": "Chester County Department of Emergency Services",
+   "date": "2025-2026",
+   "status": "Draft reviewed Dec 2025; municipalities adopting in 2026",
+   "models": [
+    "M01",
+    "M02",
+    "M03",
+    "M04",
+    "M05",
+    "M06",
+    "M07",
+    "M08",
+    "M09",
+    "M10",
+    "M11",
+    "M12",
+    "M13",
+    "M14",
+    "M15",
+    "M16"
+   ],
+   "lat": 39.96,
+   "lon": -75.605,
+   "url": "https://www.pennsylvaniahmp.com/chester-county-hmp",
+   "summary": "County plan required for FEMA mitigation funding; lists hazards, flood-prone areas and municipal mitigation actions.",
+   "for_us": "Get each municipality's flood actions into our model scenarios; projects in an adopted plan are FEMA-eligible."
+  },
+  {
+   "id": "P04",
+   "type": "Plan",
+   "title": "Watersheds 2045 (Chester County water resources plan)",
+   "org": "Chester County Water Resources Authority",
+   "date": "2023",
+   "status": "Adopted",
+   "models": [
+    "M01",
+    "M02",
+    "M03",
+    "M04",
+    "M05",
+    "M06",
+    "M07",
+    "M08",
+    "M09",
+    "M10",
+    "M11",
+    "M12",
+    "M13",
+    "M14",
+    "M15",
+    "M16"
+   ],
+   "lat": null,
+   "lon": null,
+   "url": "https://www.mychesco.com/a/tag/stormwater/",
+   "summary": "County blueprint for water resources management, including flooding and stormwater goals by watershed.",
+   "for_us": "Frame the county program (and pitch) around Watersheds 2045 goals."
+  },
+  {
+   "id": "P05",
+   "type": "Plan",
+   "title": "Tredyffrin stormwater program and Valley Creek projects",
+   "org": "Tredyffrin Township / Valley Creek Restoration Partnership",
+   "date": "2024",
+   "status": "Ongoing ($2.2M stormwater upgrades; Crabby Creek retrofit)",
+   "models": [
+    "M07"
+   ],
+   "lat": 40.064,
+   "lon": -75.46,
+   "url": "https://www.tredyffrin.org/Departments/Engineering/Stormwater-Management/Streams-Watersheds",
+   "summary": "Township stormwater fee and projects: Crabby Creek infiltration retrofit, culvert replacements (Pugh Road), Valley Creek restoration grants.",
+   "for_us": "Valley Creek (Valley Forge) model M07: include their projects and storm data."
+  },
+  {
+   "id": "P06",
+   "type": "Plan",
+   "title": "Caln Township Ida recovery projects (Beaver Creek)",
+   "org": "Caln Township",
+   "date": "2024",
+   "status": "Ongoing",
+   "models": [
+    "M02"
+   ],
+   "lat": 40.007,
+   "lon": -75.74,
+   "url": "https://calntownship.org/infrastructure-projects.html",
+   "summary": "Post-Ida repairs and projects on Beaver Creek: Fisherville Road streambank, G.O. Carlson Blvd crossing, buyout/demolition at Horseshoe Drive, bioswale.",
+   "for_us": "Beaver Creek reaches upstream of Mary Street; include in M02 scenarios."
+  },
+  {
+   "id": "P07",
+   "type": "Plan",
+   "title": "Lower West Branch Red Clay Creek Watershed Restoration Plan",
+   "org": "Brandywine Red Clay Alliance",
+   "date": "2023-08",
+   "status": "Complete",
+   "models": [
+    "M10"
+   ],
+   "lat": 39.8467,
+   "lon": -75.7116,
+   "url": "https://brandywineredclay.org/wp-content/uploads/2025/01/Lower-West-Branch-Red-Clay_Restoration-Plan_4Aug23.pdf",
+   "summary": "Restoration plan for New Garden, Kennett Square and Kennett Township (water quality focus, riparian buffers, stormwater projects).",
+   "for_us": "Project list for the Red Clay model M10 (Kennett Square)."
+  },
+  {
+   "id": "P08",
+   "type": "Plan",
+   "title": "Avondale upstream restoration plan (East Branch White Clay)",
+   "org": "White Clay Watershed Association / Clauser Environmental",
+   "date": "2025",
+   "status": "Complete",
+   "models": [
+    "M09"
+   ],
+   "lat": 39.83,
+   "lon": -75.79,
+   "url": "https://whiteclay.org/new-events/addressing-habitat-flooding-and-water-quality-in-avondale-borough-through-a-targeted-watershed-assessment-report-and-restoration-plan",
+   "summary": "Targeted watershed assessment with upstream restoration projects to reduce storm runoff into Avondale Borough.",
+   "for_us": "Candidate upstream projects to test in M09."
+  },
+  {
+   "id": "G03",
+   "type": "Grant",
+   "title": "DRBC / PEMA Delaware River Basin flood mitigation assistance",
+   "org": "Delaware River Basin Commission with PEMA",
+   "date": "2025-2026",
+   "status": "Open office hours (Coatesville, Phoenixville)",
+   "models": [
+    "M04",
+    "M06",
+    "M15"
+   ],
+   "lat": 40.133,
+   "lon": -75.515,
+   "url": "https://www.nj.gov/drbc/library/documents/PEMA-Grant/FloodMitigation_JanuaryOfficeHrs.pdf",
+   "summary": "DRBC program helping municipalities plan and fund flood mitigation; held drop-in hours in Coatesville and Phoenixville.",
+   "for_us": "Route for Phoenixville (French Creek, M06) and Schuylkill towns (M15) to fund studies that use our models."
+  },
+  {
+   "id": "S05",
+   "type": "Study",
+   "title": "Schuylkill Highlands hourly flow product",
+   "org": "Schuylkill Highlands partners (story map)",
+   "date": "2025",
+   "status": "Live product",
+   "models": [
+    "M06",
+    "M08",
+    "M07"
+   ],
+   "lat": 40.1515,
+   "lon": -75.6017,
+   "url": "https://storymaps.arcgis.com/stories/db1a2a7e0b7c4b09a77fa4c4234c8ccc",
+   "summary": "Hourly modeled flows for French, Pickering, Pigeon, Stony Run, Sixpenny and Valley Creek watersheds.",
+   "for_us": "Extra flow estimates for ungauged French and Pickering creeks when we build M06 and M08."
+  },
+  {
+   "id": "S06",
+   "type": "Study",
+   "title": "USGS Ida flood report: peak streamflows in Pennsylvania",
+   "org": "USGS (Stuckey, Conlon, Weaver)",
+   "date": "2023",
+   "status": "Complete",
+   "models": [
+    "M02",
+    "M03",
+    "M04",
+    "M05",
+    "M12",
+    "M06"
+   ],
+   "lat": null,
+   "lon": null,
+   "url": "https://doi.org/10.3133/sir20235086",
+   "summary": "Ida peaks and recurrence intervals at Pennsylvania gauges, including Chadds Ford (~49,000 cfs, about an 800-year flood).",
+   "for_us": "Calibration targets for an Ida run in every model."
+  }
+ ]
+}
