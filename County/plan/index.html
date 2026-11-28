@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brandywine Flood Planning: Downingtown and the Flood Study</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--ink:#13243b;--muted:#5d6878;--line:#e2e6ec;--bg:#f5f6f8;--acc:#0f5f8c;--ok:#2e7d32;--warn:#b45309;--bad:#b91c1c;--pend:#64748b}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{padding:14px 20px 10px;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap}
+header h1{margin:0;font-size:20px;letter-spacing:-.01em}
+header .sub{color:var(--muted);font-size:13px}
+header nav{margin-left:auto;font-size:12.5px}
+header nav a{color:var(--acc);margin-left:12px}
+.banner{background:#fff8eb;border-bottom:1px solid #f3dfb8;padding:7px 20px;font-size:12.5px;color:#6b4a12}
+main{display:grid;grid-template-columns:minmax(380px,40%) 1fr;height:calc(100% - 112px)}
+aside{overflow:auto;background:#fff;border-right:1px solid var(--line)}
+.tabs{position:sticky;top:0;background:#fff;z-index:5;display:flex;gap:2px;border-bottom:1px solid var(--line);padding:0 14px}
+.tabs button{border:0;background:none;font:600 13px system-ui;color:var(--muted);padding:11px 10px;border-bottom:2px solid transparent;cursor:pointer}
+.tabs button.on{color:var(--ink);border-color:var(--acc)}
+.pane{display:none;padding:6px 20px 40px}.pane.on{display:block}
+h2{font-size:16px;margin:22px 0 6px}
+h3{font-size:13px;margin:16px 0 4px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+p{margin:6px 0}
+.lead{font-size:15px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fbfcfd}
+.kpi b{display:block;font-size:22px;letter-spacing:-.02em}.kpi span{font-size:12px;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0}
+th{text-align:left;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line);padding:5px 6px;font-size:11.5px;vertical-align:bottom}
+td{border-bottom:1px solid #f0f2f5;padding:5px 6px;vertical-align:top}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.click{cursor:pointer}tr.click:hover{background:#f3f7fb}
+.st{font-size:11px;font-weight:700;border-radius:10px;padding:1px 8px;white-space:nowrap;color:#fff}
+.st.ok{background:var(--ok)}.st.warn{background:var(--warn)}.st.pend{background:var(--pend)}.st.bad{background:var(--bad)}
+.neg{color:var(--bad)}.pos{color:var(--ok)}.mid{color:var(--warn)}
+.note{background:#f3f7fb;border-left:3px solid var(--acc);padding:8px 10px;font-size:12.5px;margin:10px 0}
+.warnbox{background:#fff8eb;border-left:3px solid var(--warn);padding:8px 10px;font-size:12.5px;margin:10px 0}
+.fine{font-size:11.5px;color:var(--muted)}
+#mapwrap{position:relative}
+#map{height:100%}
+.ctl{position:absolute;top:10px;right:10px;z-index:500;background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.15);padding:10px 12px;font-size:12.5px;width:250px}
+.ctl select{width:100%;font:13px system-ui;padding:5px;margin:4px 0 8px}
+.ctl label{display:block;margin:2px 0;cursor:pointer}
+.ctl .cov{font-size:11.5px;color:var(--muted);margin:-4px 0 8px}
+.leg i{display:inline-block;width:14px;height:10px;margin-right:5px;vertical-align:-1px}
+.mk{width:14px;height:14px;border-radius:3px;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+@media(max-width:900px){main{grid-template-columns:1fr;grid-template-rows:50% 50%;height:auto}#mapwrap{height:60vh;order:-1}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Brandywine Flood Planning</h1><div class="sub">What the 2D flood models say about the Downingtown flood study (RFP) and the 2025 Brandywine Flood Study</div></div>
+  <nav><a href="../">County program</a><a href="../results/">Technical results</a><a href="../../Brandywine/">Flood Watch (emergency managers)</a></nav>
+</header>
+<div class="banner"><b>Preliminary, updated <span id="asof">Nov 28, 2026</span>.</b> Calibration against USGS gauges is under way. Flows and Ida levels are compared with USGS gauges and surveyed high-water marks on the "Flood Study" and "Ida check" tabs; everything else is a screening result.</div>
+<main>
+<aside>
+  <div class="tabs" id="tabs">
+    <button data-t="sum" class="on">Summary</button><button data-t="rfp">Downingtown RFP</button><button data-t="bfs">Flood Study</button><button data-t="ida">Ida check</button><button data-t="lim">Limits</button>
+  </div>
+
+  <section class="pane on" id="p-sum">
+    <h2>Where things stand</h2>
+    <p class="lead">Five linked 2D models now cover 271 sq mi of the Brandywine from the headwaters to Chadds Ford, with the five flood-control dams in place. They can test any Downingtown or Flood Study project as a before-and-after run.</p>
+    <div class="kpis" id="kpis"></div>
+    <h3>Three findings so far</h3>
+    <ol>
+      <li><b>The model's 100-year flow matches the gauge record.</b> At the USGS gauge on the East Branch at Dowlin Forge, the 24-hr 100-year storm gives 10,934 cfs against about 11,600 cfs from 57 years of gauge peaks (−6%).</li>
+      <li><b>The FEMA flows in the Flood Study look low against the gauges.</b> FEMA's 100-year at Dowlin Forge is 6,549 cfs, about half the gauge-record value. Below Downingtown the gauge record gives about 14,900 cfs, more than the Study's 12,605 cfs at the confluence, which drains more area.</li>
+      <li><b>Ida runs low on the upper East Branch.</b> Radar rainfall checks out against the Study's gauges (within 1–2% near Marsh Creek), yet the model peak at Dowlin Forge is 8,258 cfs against the 16,100 cfs measured. Wet ground from Tropical Storm Henri is the leading suspect; a wet-soil test run is next.</li>
+    </ol>
+    <h3>What comes next</h3>
+    <ul class="fine" style="font-size:12.5px">
+      <li>Wet-soil Ida test on the Upper East Branch (free, on the office PC).</li>
+      <li>Finish Coatesville and the main stem for Ida and the 24-hr design storms (needs NEER credits).</li>
+      <li>Downingtown 100-yr baseline and the Mary Street wetland concept (running now).</li>
+      <li>Model the Flood Study's priority projects as before-and-after runs.</li>
+    </ul>
+  </section>
+
+  <section class="pane" id="p-rfp">
+    <h2>Downingtown flood study (RFP): what the model answers</h2>
+    <p>The Borough's May 2026 RFP (awarded to GEI Consultants) asks for HEC-HMS/RAS modeling of the 10, 25, 50 and 100-year storms and Ida, then ten capital projects with concepts, costs and a ranking. The model supplies the flood mapping and the before-and-after testing; concepts, costs and ranking stay with GEI.</p>
+    <table id="trfp"></table>
+    <h2>Downingtown flood points</h2>
+    <p class="fine">Water-surface elevation (ft NAVD88) at each point. Click a row to zoom. Ida (radar) uses NOAA radar rainfall, hour by hour.</p>
+    <table id="tdt"></table>
+    <h2>Buildings touched by water (≥ 0.5 ft) in the Borough</h2>
+    <table id="tbld"></table>
+    <p class="fine">Building footprints with at least half a foot of water alongside. A screening count, not a first-floor damage count.</p>
+    <h2>Mary Street wetland concept</h2>
+    <p>About 40 acres of Beaver Creek floodplain upstream of Mary Street, lowered 1.5 ft on average (up to 3.5 ft, about 100,000 cubic yards), at least 40 ft from buildings and 35 ft from roads. It is drawn on open floodplain, not the actual buyout parcels, and fits the $375,000 LSA grant for Beaver Creek at Mary Street. Its 100-year run is in progress; the map shows the footprint.</p>
+  </section>
+
+  <section class="pane" id="p-bfs">
+    <h2>2025 Brandywine Flood Study: how the model lines up</h2>
+    <h3>Flows: gauge record, Flood Study and model</h3>
+    <table id="tflow"></table>
+    <p class="fine">Gauge-record values are a quick Log-Pearson III fit to USGS annual peaks through 2022, not official USGS frequency flows. Model design storms are the 24-hr SCS Type II.</p>
+    <h3>Priority projects in Pennsylvania</h3>
+    <p class="fine">All twelve Pennsylvania projects sit inside a model and can be tested as before-and-after runs. Click a row to zoom.</p>
+    <table id="tproj"></table>
+    <h3>Flood-control dams</h3>
+    <table id="tdam"></table>
+    <h3>Gauge flood-stage recommendations</h3>
+    <table id="tgage"></table>
+    <p class="fine">The Study recommends new or revised NWS flood stages at nine gauges. The model can tie each stage to the roads and buildings that flood at that level.</p>
+  </section>
+
+  <section class="pane" id="p-ida">
+    <h2>Ida (Sept 1, 2021) check</h2>
+    <h3>Rainfall: radar vs the Study's rain gauges (heaviest 6 hours, in)</h3>
+    <table id="train"></table>
+    <h3>Water levels at surveyed high-water marks (East Branch)</h3>
+    <table id="thwm"></table>
+    <div class="warnbox">The model sits about 3–4 ft below every mark, with even rainfall and with radar rainfall alike. Since the rain is right, the gap points to runoff: most likely soils already wet from Tropical Storm Henri. A morning rain band I had left out (about 0.3–0.4 in) also goes into the rerun.</div>
+    <h3>Peak flows</h3>
+    <table id="tidaq"></table>
+  </section>
+
+  <section class="pane" id="p-lim">
+    <h2>Limits and how to read this</h2>
+    <ul>
+      <li>These are screening-level model results, not regulatory flood maps.</li>
+      <li>Rain falls on every model cell (rain-on-grid) on 1-meter lidar terrain; storm sewers are not modeled, so street ponding is overstated.</li>
+      <li>Some culvert sizes and three dam outlets (Hibernia, Marsh Creek, Wharton) are assumed. As-built data from CCWRA and DCNR would remove the biggest unknowns.</li>
+      <li>Only the 10-year (6-hr storm) covers all five models today. Other storms cover the models listed under the storm picker; areas outside them show no flooding, which does not mean they stay dry.</li>
+      <li>Building counts are footprints touched by water, not first-floor elevations.</li>
+    </ul>
+    <p class="fine">Models: HEC-RAS 7.0.1, five linked 2D rain-on-grid models (Upper East Branch &amp; Marsh Creek, Buck &amp; Doe Run, Downingtown, Coatesville, main stem). Sources: 2025 Brandywine Flood Study; Borough of Downingtown RFP (May 2026); USGS NWIS peak flows; NOAA MRMS radar rainfall; Chester County GIS.</p>
+  </section>
+</aside>
+<div id="mapwrap">
+  <div id="map"></div>
+  <div class="ctl">
+    <b>Storm</b>
+    <select id="storm"></select>
+    <div class="cov" id="cov"></div>
+    <label><input type="checkbox" id="lDepth" checked> Flood depth</label>
+    <label><input type="checkbox" id="lBld" checked> Buildings touched</label>
+    <label><input type="checkbox" id="lProj" checked> Flood Study projects</label>
+    <label><input type="checkbox" id="lDam" checked> Dams</label>
+    <label><input type="checkbox" id="lGauge" checked> USGS gauges</label>
+    <label><input type="checkbox" id="lHwm" checked> Ida high-water marks</label>
+    <label><input type="checkbox" id="lMary" checked> Mary St wetland concept</label>
+    <div class="leg fine" style="margin-top:6px"><i style="background:#c6dbef"></i>0.5–1 ft <i style="background:#6baed6"></i>2–4 <i style="background:#08519c"></i>8+ ft</div>
+  </div>
+</div>
+</main>
+<script>
+const STORMS=[
+ {id:'p19',name:'Ida, Sept 1 2021 (radar rain)'},
+ {id:'p17',name:'100-year, 24-hr storm'},
+ {id:'p14',name:'10-year, 24-hr storm'},
+ {id:'p03',name:'10-year, 6-hr storm'}];
+const MODELNAME={M03:'Upper East Branch',M12:'Buck/Doe Run',M02:'Downingtown',M04:'Coatesville',M05:'Main stem'};
+const PROJ=[ // 2025 Flood Study priority projects in PA (approx = location estimated)
+ ['Main stem','East Penn Railroad bridge replacement','Chadds Ford/Pennsbury','High','M05',39.8706,-75.5941,1],
+ ['Main stem','US Rte 1 bridge replacement','Chadds Ford/Pennsbury','High','M05',39.8716,-75.5933,1],
+ ['Main stem','PA Dam No. 1 removal','Chadds Ford/Pennsbury','Low','M05',39.8724,-75.5926,1],
+ ['Main stem','Conservancy floodplain restoration','Chadds Ford/Pennsbury','Medium','M05',39.8734,-75.5917,1],
+ ['East Branch','Rte 322 bridge replacement','East Bradford','Low','M02',39.99498,-75.69899,0],
+ ['East Branch','Rte 30 Bus./Lancaster Ave bridge replacement','Downingtown','High','M02',40.00589,-75.70518,0],
+ ['East Branch','Barneston Dam upgrades (labyrinth weir)','Wallace','High','M03',40.10164,-75.7902,0],
+ ['West Branch','Reading Wilm. Northern RR bridge replacement','Modena','Medium','M04',39.9626,-75.8009,1],
+ ['West Branch','Cleveland Cliffs rail bridge replacement','South Coatesville','Low','M04',39.9729,-75.8172,1],
+ ['West Branch','East Glencrest Rd bridge replacement','Valley','Low','M04',39.98641,-75.82722,0],
+ ['Beaver Creek','Lloyd Ave bridge replacement','Caln','Low','M02',40.00319,-75.72457,0],
+ ['Beaver Creek','Manor Ave bridge replacement','Downingtown','High','M02',40.00752,-75.71178,0]];
+const DAMS=[ // name, stream, type, model peak pool/outflow (10-yr 24h, 100-yr 24h, Ida radar), Study note, lat, lon
+ ['Barneston','East Branch (Wallace)','Dry dam','M03','Study: modeled outflow 1,297 cfs at the 100-yr',40.10164,-75.7902],
+ ['Marsh Creek Reservoir','Marsh Creek','Impoundment','M03','Study: Ida outflow ~369 cfs, pool ~365.5 ft (+6 ft)',40.05538,-75.71685],
+ ['Wharton Blvd','Marsh Creek tributary','Stormwater dam','M03','Not in the Study',40.05974,-75.68335],
+ ['Beaver Creek','Beaver Creek','Dry dam','M02','Study: restricts flow up to the 100-yr (rehab 2021–22)',40.03065,-75.78235],
+ ['Hibernia (Chambers Lake)','Birch Run','Impoundment','M04','Study: restricts flow up to the 100-yr (rehab 2020)',40.02854,-75.84878]];
+const GAUGES=[ // id, name, lat, lon, Study recommendation, gauge-record Q10, Q100, Ida peak
+ ['01480300','West Branch near Honey Brook',40.0728,-75.8611,'Review/revise NWS flood stage',3071,6300,null],
+ ['01480500','West Branch at Coatesville',39.9857,-75.8274,'Review/revise NWS flood stage',5115,11746,null],
+ ['01480617','West Branch at Modena',39.9618,-75.8013,'Review/revise NWS flood stage',6440,14155,12300],
+ ['01480675','Marsh Creek near Glenmoore',40.0978,-75.7416,'',531,1029,null],
+ ['01480700','East Branch near Downingtown (Dowlin Forge)',40.0347,-75.7085,'Develop a new NWS flood stage',5505,11591,16100],
+ ['01480870','East Branch below Downingtown',39.9687,-75.6733,'Review/revise NWS flood stage',7578,14861,21000],
+ ['01481000','Brandywine Creek at Chadds Ford',39.8697,-75.5935,'Review/revise NWS flood stage',15434,31913,49000]];
+const HWM=[ // name, lat, lon, mark, FEMA100, model even-rain, model radar
+ ['Rte 322 (Downingtown Pike)',39.99498,-75.69899,232.5,224.7,228.2,229.3],
+ ['Pennsylvania Ave',40.00686,-75.70633,241.5,237.5,237.3,237.8],
+ ['Rte 282 (Wallace Ave)',40.01438,-75.70467,248.0,246.3,244.2,244.2],
+ ['Rte 30 Bypass',40.01763,-75.70689,255.1,251.7,251.0,251.1],
+ ['Dowlin Forge Rd (USGS 01480700)',40.03487,-75.70852,270.8,266.2,266.9,266.8]];
+const RAIN=[['Modena',7.02,7.10],['Chester Springs',6.18,6.31],['Glenmoore (Marsh Creek)',4.99,5.04],['EB below Downingtown',5.83,6.20],['Marshallton',5.25,6.18],['Chambers Lake (Hibernia)',5.82,4.60],['Chadds Ford',3.28,2.70]];
+const fmt=n=>n==null?'–':Math.round(n).toLocaleString();
+const pct=(a,b)=>{if(a==null||!b)return'–';const d=(a-b)/b*100;const c=Math.abs(d)<=15?'pos':Math.abs(d)<=35?'mid':'neg';return `<span class="${c}">${d>0?'+':''}${d.toFixed(0)}%</span>`};
+const st=(c,t)=>`<span class="st ${c}">${t}</span>`;
+let R=null, ov=[], bl=L.layerGroup();
+const map=L.map('map').setView([40.0,-75.74],11);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri, HERE, Garmin, OpenStreetMap',maxNativeZoom:16,maxZoom:19}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxNativeZoom:16,maxZoom:19,pane:'shadowPane'}).addTo(map);
+const icon=(c,shape)=>L.divIcon({className:'',html:`<div class="mk" style="background:${c};${shape==='round'?'border-radius:50%':''}"></div>`,iconSize:[14,14]});
+const projL=L.layerGroup(PROJ.map(p=>L.marker([p[5],p[6]],{icon:icon(p[3]==='High'?'#b91c1c':p[3]==='Medium'?'#d97706':'#64748b')}).bindPopup(`<b>${p[1]}</b><br>${p[0]} · ${p[2]}<br>Flood Study priority: ${p[3]}<br>Model: ${MODELNAME[p[4]]}${p[7]?'<br><i>Location approximate</i>':''}`)));
+const damL=L.layerGroup(DAMS.map(d=>L.marker([d[5],d[6]],{icon:icon('#0f5f8c')}).bindPopup(`<b>${d[0]} Dam</b><br>${d[1]} · ${d[2]}<br>${d[4]}`)));
+const gaugeL=L.layerGroup(GAUGES.map(g=>L.marker([g[2],g[3]],{icon:icon('#10b981','round')}).bindPopup(`<b>USGS ${g[0]}</b><br>${g[1]}<br>Gauge record: 10-yr ~${fmt(g[5])} cfs, 100-yr ~${fmt(g[6])} cfs${g[7]?`<br>Ida 2021 peak: ${fmt(g[7])} cfs`:''}${g[4]?`<br>Flood Study: ${g[4]}`:''}`)));
+const hwmL=L.layerGroup(HWM.map(h=>L.circleMarker([h[1],h[2]],{radius:7,color:'#7c2d12',weight:2,fillColor:'#fdba74',fillOpacity:1}).bindPopup(`<b>${h[0]}</b><br>Ida mark ${h[3]} ft · model (radar) ${h[6]} ft (${(h[6]-h[3]).toFixed(1)} ft)`)));
+let maryL=L.layerGroup();
+fetch('../results/mary_footprint.geojson').then(r=>r.json()).then(g=>{maryL.addLayer(L.geoJSON(g,{style:{color:'#15803d',weight:2,fillColor:'#4ade80',fillOpacity:.35,dashArray:'4 3'}}).bindPopup('<b>Mary Street wetland concept</b><br>About 40 acres lowered 1.5 ft on average. 100-yr test run in progress.'));});
+[projL,damL,gaugeL,hwmL,maryL,bl].forEach(l=>l.addTo(map));
+const tog={lProj:projL,lDam:damL,lGauge:gaugeL,lHwm:hwmL,lMary:maryL,lBld:bl};
+Object.entries(tog).forEach(([id,l])=>document.getElementById(id).onchange=e=>e.target.checked?l.addTo(map):map.removeLayer(l));
+document.getElementById('lDepth').onchange=()=>draw();
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.t));});
+fetch('../results/results.json').then(r=>r.json()).then(j=>{R=j;
+  const sel=document.getElementById('storm');
+  sel.innerHTML=STORMS.map(s=>`<option value="${s.id}">${s.name}</option>`).join(''); sel.onchange=draw; draw(); tables();});
+function runs(p){return Object.values(R.runs).filter(r=>r.plan===p)}
+function draw(){
+  ov.forEach(o=>map.removeLayer(o)); ov=[]; bl.clearLayers();
+  const p=document.getElementById('storm').value, rs=runs(p);
+  document.getElementById('cov').textContent='Covers: '+(rs.map(r=>MODELNAME[r.model]).join(', ')||'none yet');
+  rs.forEach(r=>{ if(document.getElementById('lDepth').checked) ov.push(L.imageOverlay('../results/img/'+r.model+'_'+p+'.png',r.bounds,{opacity:.85}).addTo(map));
+    r.bpts.forEach(([a,b,d])=>L.circleMarker([a,b],{radius:d>=2?3:2,color:'#dc2626',weight:0,fillOpacity:.75}).bindTooltip(`Building · ${d} ft`).addTo(bl)); });
+  kpis();
+}
+function kpis(){
+  const p=document.getElementById('storm').value, rs=runs(p);
+  const dt=rs.reduce((s,r)=>s+(r.by_muni.Downingtown||0),0), b=rs.reduce((s,r)=>s+r.bldg,0), a=rs.reduce((s,r)=>s+r.acres,0);
+  document.getElementById('kpis').innerHTML=`<div class="kpi"><b>${fmt(a)}</b><span>acres under 0.5 ft+ of water</span></div><div class="kpi"><b>${fmt(b)}</b><span>buildings touched</span></div><div class="kpi"><b>${rs.some(r=>r.model==='M02')?fmt(dt):'–'}</b><span>of them in Downingtown Borough</span></div><div class="fine" style="grid-column:1/-1">${document.getElementById('storm').selectedOptions[0].text} · covers ${rs.length} of 5 models</div>`;
+}
+function zoom(a,b,z){map.setView([a,b],z||15)}
+function tables(){
+  const r=(m,p)=>R.runs[m+'_'+p];
+  // RFP
+  const RFP=[
+   ['Existing flooding, 10-yr storm',st('ok','done'),'Depth map, buildings, flows (6-hr storm); 24-hr storm runs next'],
+   ['Existing flooding, 100-yr storm',st('warn','running'),'Downingtown 100-yr (24-hr) running now; upstream 100-yr matches the gauge record within 6%'],
+   ['25 and 50-yr storms',st('pend','queued'),'Plans built; need NEER credits'],
+   ['Ida 2021',st('warn','calibrating'),'Radar-rain run done; 3–4 ft below the marks; wet-soil test next'],
+   ['Ten capital projects, before and after',st('pend','ready'),'Mary St wetland is the first (running); others can be drawn into the terrain'],
+   ['Downstream effects of each project',st('ok','built in'),'East Branch from Marsh Creek to the confluence in one model, main stem below'],
+   ['Concepts, costs, ranking','—','GEI; the model supplies benefits (depth removed, buildings dry)'],
+   ['Task 8: real-time 2D mapping (not purchased)',st('ok','prototype'),'<a href="../../Brandywine/">Brandywine Flood Watch</a> with live rain, gauges and scenario maps']];
+  document.getElementById('trfp').innerHTML='<tr><th>RFP item</th><th>Status</th><th>What the model gives</th></tr>'+RFP.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join('');
+  const P=R.downingtown; const keep=Object.entries(P).filter(([k])=>!/S Lloyd|Beaver Creek at Lancaster/.test(k));
+  document.getElementById('tdt').innerHTML='<tr><th>Location</th><th class="n">10-yr (6-hr)</th><th class="n">Ida even rain</th><th class="n">Ida radar</th></tr>'+keep.map(([k,v])=>`<tr class="click" onclick="zoom(${v.lat},${v.lon},16)"><td>${k}</td><td class="n">${v.p03.wse}</td><td class="n">${v.p18.wse}</td><td class="n">${v.p19?v.p19.wse:'–'}</td></tr>`).join('');
+  const rows=[['10-yr (6-hr storm)','p03'],['Ida, even rain','p18'],['Ida, radar rain','p19']];
+  document.getElementById('tbld').innerHTML='<tr><th>Storm</th><th class="n">Downingtown</th><th class="n">Caln</th><th class="n">East Brandywine</th></tr>'+rows.map(([n,p])=>{const x=r('M02',p);return x?`<tr><td>${n}</td><td class="n">${x.by_muni.Downingtown||0}</td><td class="n">${x.by_muni.Caln||0}</td><td class="n">${x.by_muni['East Brandywine']||0}</td></tr>`:''}).join('');
+  // flows
+  const F=[
+   ['East Branch at Dowlin Forge (60 sq mi, USGS 01480700)',5505,11591,'FEMA Q100 6,549',r('M03','p14')&&r('M03','p14').peak.Outlet,r('M03','p17')&&r('M03','p17').peak.Outlet],
+   ['East Branch below Downingtown (90 sq mi, USGS 01480870)',7578,14861,'(at confluence, 123 sq mi: Q10 8,417 / Q100 12,605)',null,null],
+   ['Brandywine at Chadds Ford (287 sq mi, USGS 01481000)',15434,31913,'Q10 17,137 / Q100 32,711',null,null]];
+  document.getElementById('tflow').innerHTML='<tr><th>Location</th><th class="n">Gauge 10-yr</th><th class="n">Gauge 100-yr</th><th>Flood Study</th><th class="n">Model 10-yr</th><th class="n">Model 100-yr</th></tr>'+F.map(f=>`<tr><td>${f[0]}</td><td class="n">${fmt(f[1])}</td><td class="n">${fmt(f[2])}</td><td class="fine">${f[3]}</td><td class="n">${f[4]?fmt(f[4])+'<br>'+pct(f[4],f[1]):'pending'}</td><td class="n">${f[5]?fmt(f[5])+'<br>'+pct(f[5],f[2]):'pending'}</td></tr>`).join('');
+  document.getElementById('tproj').innerHTML='<tr><th>Project</th><th>Where</th><th>Priority</th><th>Model</th></tr>'+PROJ.map(p=>`<tr class="click" onclick="zoom(${p[5]},${p[6]},16)"><td>${p[1]}</td><td>${p[2]}</td><td>${p[3]}</td><td>${MODELNAME[p[4]]}</td></tr>`).join('');
+  document.getElementById('tdam').innerHTML='<tr><th>Dam</th><th class="n">10-yr pool / out</th><th class="n">100-yr pool / out</th><th class="n">Ida pool / out</th><th>Flood Study</th></tr>'+DAMS.map(d=>{const key=d[0].split(' ')[0].replace('(','')+'Dam';const g=p=>{const x=r(d[3],p);if(!x)return'–';const k=Object.keys(x.dams).find(k=>k.toLowerCase().startsWith(d[0].split(' ')[0].toLowerCase()));return k?`${x.dams[k].pool_max} ft / ${fmt(x.dams[k].q_out)}`:'–'};return `<tr class="click" onclick="zoom(${d[5]},${d[6]},15)"><td>${d[0]}</td><td class="n">${g('p14')}</td><td class="n">${g('p17')}</td><td class="n">${g('p19')}</td><td class="fine">${d[4]}</td></tr>`}).join('')+'<tr><td colspan="5" class="fine">Pool elevation (ft) / peak outflow (cfs), 24-hr storms and Ida radar. Coatesville and Downingtown dam results fill in as those runs finish. Hibernia, Marsh Creek and Wharton outlets are assumed pending as-built data.</td></tr>';
+  document.getElementById('tgage').innerHTML='<tr><th>Gauge</th><th>Study recommendation</th><th class="n">Ida peak (cfs)</th></tr>'+GAUGES.filter(g=>g[4]).map(g=>`<tr class="click" onclick="zoom(${g[2]},${g[3]},14)"><td>${g[1]}<br><span class="fine">USGS ${g[0]}</span></td><td>${g[4]}</td><td class="n">${fmt(g[7])}</td></tr>`).join('')+'<tr><td>Beaver Creek at Mary Street, Downingtown</td><td>Develop a new NWS flood stage</td><td class="n">–</td></tr><tr><td>Buck Run at Doe Run<br><span class="fine">USGS 01480629</span></td><td>Develop a new NWS flood stage</td><td class="n">–</td></tr>';
+  document.getElementById('train').innerHTML='<tr><th>Gauge</th><th class="n">Gauge</th><th class="n">Radar</th><th class="n">Diff</th></tr>'+RAIN.map(x=>`<tr><td>${x[0]}</td><td class="n">${x[1].toFixed(2)}</td><td class="n">${x[2].toFixed(2)}</td><td class="n">${pct(x[2],x[1])}</td></tr>`).join('');
+  document.getElementById('thwm').innerHTML='<tr><th>Bridge</th><th class="n">Ida mark</th><th class="n">Model, even rain</th><th class="n">Model, radar</th><th class="n">FEMA 100-yr</th></tr>'+HWM.map(h=>`<tr class="click" onclick="zoom(${h[1]},${h[2]},16)"><td>${h[0]}</td><td class="n">${h[3].toFixed(1)}</td><td class="n">${h[5].toFixed(1)} <span class="neg">(${(h[5]-h[3]).toFixed(1)})</span></td><td class="n">${h[6].toFixed(1)} <span class="neg">(${(h[6]-h[3]).toFixed(1)})</span></td><td class="n">${h[4].toFixed(1)}</td></tr>`).join('');
+  const q=(m,p)=>r(m,p)?r(m,p).peak.Outlet:null;
+  document.getElementById('tidaq').innerHTML='<tr><th>Location</th><th class="n">Measured / Study</th><th class="n">Model radar</th><th class="n">Diff</th></tr>'+
+   `<tr><td>East Branch at Dowlin Forge (USGS)</td><td class="n">16,100 measured</td><td class="n">${fmt(q('M03','p19'))}</td><td class="n">${pct(q('M03','p19'),16100)}</td></tr>`+
+   `<tr><td>East Branch at the confluence</td><td class="n">25,000 Study estimate</td><td class="n">${fmt(q('M02','p19'))}</td><td class="n">${pct(q('M02','p19'),25000)}</td></tr>`+
+   `<tr><td>West Branch at Modena (USGS)</td><td class="n">12,300 measured</td><td class="n">pending</td><td></td></tr>`+
+   `<tr><td>Brandywine at Chadds Ford (USGS)</td><td class="n">49,000 measured</td><td class="n">pending</td><td></td></tr>`;
+}
+</script>
+</body>
+</html>
