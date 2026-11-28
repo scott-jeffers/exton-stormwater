@@ -3,249 +3,668 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chester County Flood Program</title>
+<title>Chester County Flood Modeling</title>
+<meta name="description" content="2D flood models for Chester County watersheds, starting with the Brandywine: status, results, checks against the 2025 Brandywine Flood Study and USGS gauges, and sources.">
 <link rel="icon" href="../Dashboard/favicon.svg?v=1" type="image/svg+xml">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-/* ---- Colours for each phase: edit here ---- */
 :root{
-  --done:#2e7d32; --p1:#f59e0b; --p2:#2f80ed; --p3:#8e5cd9; --p4:#9aa5b1; --prog:#0ea5e9; --next:#ef6c00;
-  --ink:#14213d; --muted:#5b6472; --line:#e3e7ee; --bg:#f6f7fb;
+  --ink:#13243b;--muted:#5d6878;--line:#e2e6ec;--bg:#f4f6f9;--card:#fff;--acc:#0f5f8c;--acc2:#e6f0f7;
+  --ok:#2e7d32;--warn:#b45309;--bad:#b91c1c;--pend:#64748b;
+  --done:#2e7d32;--p1:#f59e0b;--p2:#2f80ed;--p3:#8e5cd9;--p4:#9aa5b1;--prog:#0ea5e9;--next:#ef6c00;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
-header{display:flex;align-items:center;gap:18px;padding:10px 16px;background:var(--ink);color:#fff;flex-wrap:wrap}
-header h1{font-size:18px;margin:0;font-weight:650}
-header .sub{font-size:12px;opacity:.75}
-.kpis{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
-.kpi{background:rgba(255,255,255,.08);border-radius:8px;padding:5px 12px;text-align:center;min-width:110px}
-.kpi b{display:block;font-size:18px}
-.kpi span{font-size:11px;opacity:.8}
-main{display:grid;grid-template-columns:360px 1fr;height:calc(100% - 64px)}
-aside{overflow:auto;background:#fff;border-right:1px solid var(--line);padding:12px}
-#map{height:100%}
-.bar{height:10px;background:#e8ebf1;border-radius:6px;overflow:hidden;margin:4px 0 2px}
-.bar i{display:block;height:100%;background:var(--done)}
-.small{font-size:12px;color:var(--muted)}
-h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:16px 0 6px}
+html,body{margin:0;font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--acc)}
+/* ---------- header + nav ---------- */
+.top{background:var(--ink);color:#fff}
+.top .in{max-width:1280px;margin:0 auto;padding:14px 20px 0;display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.brand h1{margin:0;font-size:20px;letter-spacing:-.01em}
+.brand .sub{font-size:12.5px;opacity:.75}
+.live{margin-left:auto;font-size:13px;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);border-radius:16px;padding:4px 12px;white-space:nowrap}
+.live:hover{background:rgba(255,255,255,.1)}
+nav.main{position:sticky;top:0;z-index:1000;background:var(--ink);border-top:1px solid rgba(255,255,255,.08)}
+nav.main .in{max-width:1280px;margin:0 auto;padding:0 12px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.main a{color:#cbd5e1;text-decoration:none;font-weight:600;font-size:14px;padding:11px 12px;border-bottom:3px solid transparent;white-space:nowrap}
+nav.main a.on{color:#fff;border-color:#7dd3fc}
+.draft{background:#fff8eb;border-bottom:1px solid #f3dfb8;color:#6b4a12;font-size:13px}
+.draft .in{max-width:1280px;margin:0 auto;padding:7px 20px}
+/* ---------- page sections ---------- */
+section.page{display:none}
+section.page.on{display:block}
+.wrap{max-width:1100px;margin:0 auto;padding:22px 20px 60px}
+h2{font-size:22px;margin:6px 0 8px;letter-spacing:-.01em}
+h3{font-size:16px;margin:24px 0 8px}
+h4{font-size:12px;margin:18px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.lead{font-size:17px;color:#253a55;max-width:820px}
+.muted{color:var(--muted)}.fine{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card h3{margin:0 0 6px;font-size:16px}
+a.card{display:block;text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .15s}
+a.card:hover{border-color:#9cc3dc;box-shadow:0 2px 10px rgba(15,95,140,.08)}
+a.card .go{color:var(--acc);font-weight:600;font-size:13.5px;margin-top:8px;display:inline-block}
+.kpi b{display:block;font-size:28px;letter-spacing:-.02em;line-height:1.1}
+.kpi span{font-size:13px;color:var(--muted)}
+.find{border-left:4px solid var(--acc)}
+.find .ftag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--acc)}
+.steps{list-style:none;padding:0;margin:0}
+.steps li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.steps li:last-child{border:0}
+.st{font-size:11px;font-weight:700;border-radius:10px;padding:2px 9px;white-space:nowrap;color:#fff;align-self:flex-start;margin-top:2px}
+.st.ok{background:var(--ok)}.st.warn{background:var(--warn)}.st.pend{background:var(--pend)}.st.run{background:var(--prog)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:6px 0;background:#fff}
+th{text-align:left;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line);padding:6px 8px;font-size:12px;vertical-align:bottom}
+td{border-bottom:1px solid #eef1f5;padding:6px 8px;vertical-align:top}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.click{cursor:pointer}tr.click:hover td{background:#f3f7fb}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px;background:#fff}
+.tw table{margin:0}
+.neg{color:var(--bad)}.pos{color:var(--ok)}.mid{color:var(--warn)}
+.note{background:var(--acc2);border-left:3px solid var(--acc);padding:10px 12px;font-size:13.5px;margin:12px 0;border-radius:0 8px 8px 0}
+.warnbox{background:#fff8eb;border-left:3px solid var(--warn);padding:10px 12px;font-size:13.5px;margin:12px 0;border-radius:0 8px 8px 0}
+.src{list-style:none;padding:0;margin:0}
+.src li{padding:8px 0;border-bottom:1px solid var(--line)}
+.src li:last-child{border:0}
+.src .what{font-size:13px;color:var(--muted)}
+.chip{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+/* ---------- map + panel layouts ---------- */
+.split{display:grid;grid-template-columns:minmax(360px,420px) 1fr;height:calc(100vh - 128px);min-height:560px}
+.split .panel{overflow:auto;background:#fff;border-right:1px solid var(--line)}
+.split .mapbox{position:relative}
+.split .mapbox>div.map{position:absolute;inset:0}
+.ptabs{position:sticky;top:0;z-index:5;background:#fff;display:flex;gap:2px;border-bottom:1px solid var(--line);padding:0 10px;overflow-x:auto;scrollbar-width:none}
+.ptabs button{flex:0 0 auto;border:0;background:none;font:600 13px system-ui;color:var(--muted);padding:11px 7px;border-bottom:2px solid transparent;cursor:pointer}
+.ptabs button.on{color:var(--ink);border-color:var(--acc)}
+.pp{display:none;padding:6px 18px 40px}.pp.on{display:block}
+.pp h3:first-child{margin-top:14px}
+.pp table{font-size:12.5px}
+.ctl{position:absolute;top:10px;right:10px;z-index:500;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);padding:10px 12px;font-size:13px;width:260px}
+.ctl select{width:100%;font:14px system-ui;padding:6px;margin:2px 0 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.ctl label{display:block;margin:3px 0;cursor:pointer}
+.ctl .cov{font-size:12px;color:var(--muted);margin-bottom:6px}
+.ctl .lbtn{display:none}
+.leg i{display:inline-block;width:14px;height:10px;margin-right:4px;vertical-align:-1px}
+.mk{width:14px;height:14px;border-radius:3px;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.kp div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fbfcfd}
+.kp b{display:block;font-size:20px}.kp span{font-size:11.5px;color:var(--muted)}
+/* county program side list */
 .model{display:flex;gap:8px;align-items:flex-start;padding:7px 8px;border-radius:8px;cursor:pointer;border:1px solid transparent}
 .model:hover,.model.sel{background:#f1f5ff;border-color:#d5e1ff}
-.sw{width:12px;height:12px;border-radius:3px;margin-top:3px;flex:none}
-.model .n{font-weight:600}
-.model .m{font-size:12px;color:var(--muted)}
+.sw{width:12px;height:12px;border-radius:3px;margin-top:4px;flex:none}
+.model .n{font-weight:600;font-size:13.5px}.model .m{font-size:12px;color:var(--muted)}
 .tag{font-size:11px;padding:1px 6px;border-radius:10px;background:#eef1f6;color:#374151;margin-left:4px;white-space:nowrap}
-#detail{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:6px;display:none;background:#fbfcff}
-#detail h3{margin:0 0 4px;font-size:15px}
-#detail a{color:#1d4ed8}
+#pDetail{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;display:none;background:#fbfcff;font-size:13.5px}
+#pDetail h3{margin:0 0 4px}
+.study{padding:7px 9px;border-radius:8px;border:1px solid var(--line);margin:6px 0;cursor:pointer;background:#fff;font-size:13.5px}
+.study:hover{background:#f8fafc}
+.filters{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.filters button{font:12px system-ui;border:1px solid var(--line);background:#fff;border-radius:12px;padding:3px 10px;cursor:pointer}
+.filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .legend{background:#fff;padding:8px 10px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.2);font-size:12px;line-height:1.7}
 .legend .sw{display:inline-block;vertical-align:-1px;margin-right:6px;margin-top:0}
-.legend .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:2px solid #fff;box-shadow:0 0 0 1px #999}
-.leaflet-popup-content{font-size:13px;min-width:220px}
-.study{padding:7px 8px;border-radius:8px;border:1px solid var(--line);margin:6px 0;cursor:pointer;background:#fff}
-.study:hover{background:#f8fafc}
-.study .t{font-weight:600}
-.stype{display:inline-block;font-size:10px;font-weight:700;color:#fff;border-radius:4px;padding:1px 5px;margin-right:6px;vertical-align:1px}
-.filters{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
-.filters button{font:12px system-ui;border:1px solid var(--line);background:#fff;border-radius:12px;padding:2px 9px;cursor:pointer}
-.filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.sq{display:inline-block;width:11px;height:11px;transform:rotate(45deg);margin-right:7px;vertical-align:0;border:1.5px solid #fff;box-shadow:0 0 0 1px #888}
-.leaflet-popup-content table{border-collapse:collapse}
-.leaflet-popup-content td{padding:1px 6px 1px 0}
-@media (max-width:800px){main{grid-template-columns:1fr;grid-template-rows:45% 55%}aside{order:2}}
+.chartbox{position:relative;height:200px;margin:6px 0 4px}
+.leaflet-popup-content{font-size:13px}
+/* ---------- phones ---------- */
+@media (max-width:900px){
+  html,body{font-size:14.5px}
+  .top .in{padding:10px 14px 0}.brand h1{font-size:17px}.brand .sub{display:none}
+  .live{font-size:12px;padding:3px 10px}
+  .draft .in{padding:6px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+  .draft.open .in{white-space:normal}
+  .wrap{padding:16px 14px 50px}
+  h2{font-size:19px}.lead{font-size:15.5px}
+  .g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}
+  .kpi b{font-size:22px}
+  .split{display:flex;flex-direction:column;height:auto;min-height:0}
+  .split .mapbox{order:-1;height:52vh;flex:0 0 auto}
+  .split .panel{border-right:0;overflow:visible}
+  .ptabs{top:44px}
+  .pp{padding:4px 14px 40px}
+  .tw table{min-width:480px}
+  .ctl{width:auto;max-width:74%;padding:6px 8px}
+  .ctl .t{display:none}.ctl .cov,.ctl .rest{display:none}
+  .ctl.open .rest,.ctl.open .cov{display:block}
+  .ctl .lbtn{display:block;width:100%;margin-top:4px;font:600 12px system-ui;border:1px solid var(--line);background:#f8fafc;border-radius:6px;padding:5px}
+  .ctl label{padding:4px 0}
+}
 </style>
 </head>
 <body>
-<header>
-  <div><h1>Chester County Flood Program</h1><div class="sub">Which watersheds have flood models, which are next, and the plan for the rest · <a href="plan/" style="color:#cfe0ff;font-weight:600">Flood planning (Downingtown + Flood Study) →</a> · <a href="results/" style="color:#cfe0ff;font-weight:600">Model results →</a> · <a href="../Brandywine/" style="color:#cfe0ff;font-weight:600">Brandywine Flood Watch (emergency managers) →</a></div></div>
-  <div class="kpis" id="kpis"></div>
-</header>
-<main>
-  <aside>
-    <div class="small">Area modeled</div>
-    <div class="bar"><i id="barDone"></i></div>
-    <div class="small" id="barText"></div>
-    <div id="detail"></div>
-    <div id="list"></div>
-    <h2>Studies, plans, RFPs &amp; grants</h2>
-    <div class="small">Other flood work in the county: what it found, and what it means for our models. Click one to see where it is.</div>
-    <div class="filters" id="sfilters"></div>
-    <div id="studies"></div>
-    <h2>Edit this dashboard</h2>
-    <div class="small">Studies live in <code>County/data/studies.json</code>. Model status lives in <code>County/data/program.json</code>: change a model's <code>status</code>, <code>phase</code>, <code>notes</code> or <code>dashboard</code> link, commit, and the map updates. Phase colours are at the top of <code>index.html</code>.</div>
-  </aside>
-  <div id="map"></div>
-</main>
+<div class="top"><div class="in">
+  <div class="brand"><h1>Chester County Flood Modeling</h1><div class="sub">2D flood models for the county's watersheds, starting with the Brandywine · prepared for the Chester County Water Resources Authority</div></div>
+  <a class="live" href="#dashboards">Live flood dashboards ↗</a>
+</div></div>
+<nav class="main"><div class="in" id="nav">
+  <a href="#overview" data-p="overview">Overview</a>
+  <a href="#program" data-p="program">County program</a>
+  <a href="#brandywine" data-p="brandywine">Brandywine</a>
+  <a href="#checks" data-p="checks">Checks</a>
+  <a href="#sources" data-p="sources">Sources &amp; methods</a>
+</div></nav>
+<div class="draft" id="draft"><div class="in"><b>Working draft, updated <span id="asof">Nov 28, 2026</span>.</b> Results are preliminary while calibration against USGS gauges continues. Screening-level results, not regulatory flood maps.</div></div>
+
+<!-- ======================= OVERVIEW ======================= -->
+<section class="page" id="p-overview"><div class="wrap">
+  <h2>What this is</h2>
+  <p class="lead">Linked 2D flood models of Chester County's watersheds, built from lidar terrain, county land cover and soils, and the region's flood-control dams. The first six cover the Brandywine above Chadds Ford. They map where water goes in design storms and in Ida, and they can test a proposed project before it is built.</p>
+  <div class="grid g4" id="ovKpis" style="margin:16px 0 8px"></div>
+
+  <h3>What the models show so far</h3>
+  <div class="grid g3">
+    <div class="card find"><div class="ftag">Flows</div><h3>The 100-year matches the gauge record</h3><p class="muted" style="margin:0">At the USGS gauge on the East Branch at Dowlin Forge, the modeled 100-year peak is 10,934 cfs against about 11,600 cfs from 57 years of measured peaks (−6%).</p></div>
+    <div class="card find"><div class="ftag">Flood Study</div><h3>Gauge records run higher than FEMA's flows</h3><p class="muted" style="margin:0">The FEMA 100-year flow used in the 2025 Brandywine Flood Study at Dowlin Forge is 6,549 cfs, about half of what the gauge record gives. Updating reference flows to include 2011–2021 floods may be worth a look.</p></div>
+    <div class="card find"><div class="ftag">Ida</div><h3>Ida runs low upstream, and we know where to look</h3><p class="muted" style="margin:0">Radar rainfall matches the Study's rain gauges within 1–2% near Marsh Creek, yet the modeled peak at Dowlin Forge is about half the 16,100 cfs measured. A wet-soil test (ground soaked by Henri a week earlier) is running.</p></div>
+  </div>
+
+  <h3>In this package</h3>
+  <div class="grid g2">
+    <a class="card" href="#program"><h3>County program</h3><div class="muted">All 16 planned models, their build order and status, plus the studies, plans, RFPs and grants already under way in each watershed.</div><span class="go">Open the county map →</span></a>
+    <a class="card" href="#brandywine"><h3>Brandywine results</h3><div class="muted">Flood maps by storm, Downingtown's flood points and RFP, how the models line up with the 2025 Flood Study, dam performance and each model's flows.</div><span class="go">Open the Brandywine map →</span></a>
+    <a class="card" href="#checks"><h3>Checks against gauges and marks</h3><div class="muted">Modeled flows against USGS gauge records, radar rainfall against the Study's rain gauges, and Ida water levels against surveyed high-water marks.</div><span class="go">See the checks →</span></a>
+    <a class="card" href="#sources"><h3>Sources &amp; methods</h3><div class="muted">Every study, dataset and tool used, with links, plus how the models are built and what they can and cannot say.</div><span class="go">See sources →</span></a>
+  </div>
+
+  <h3 id="dashboards">Live flood dashboards</h3>
+  <p class="muted" style="margin-top:0">Built for emergency managers: live radar, rain, NWS alerts and USGS gauges, with the model's flood map for the storm that matches the forecast. They open in a new tab.</p>
+  <div class="grid g3">
+    <a class="card" href="../Brandywine/" target="_blank" rel="noopener"><h3>Brandywine Flood Watch</h3><div class="muted">East and West Branch, Downingtown, Coatesville and the main stem.</div><span class="go">Open ↗</span></a>
+    <a class="card" href="../" target="_blank" rel="noopener"><h3>Valley Creek Flood Watch</h3><div class="muted">Exton and West Whiteland, with storm sewers.</div><span class="go">Open ↗</span></a>
+    <a class="card" href="https://scott-jeffers.github.io/Upper-Providence-Model/Dashboard/" target="_blank" rel="noopener"><h3>Upper Providence River Flood Watch</h3><div class="muted">Schuylkill River and Perkiomen Creek frontage (Montgomery County).</div><span class="go">Open ↗</span></a>
+  </div>
+
+  <h3>Status and next steps</h3>
+  <div class="card"><ul class="steps">
+    <li><span class="st ok">done</span><div><b>Six Brandywine models built and linked</b><div class="fine">Upper East Branch &amp; Marsh Creek, Buck &amp; Doe Run, Downingtown, Coatesville, main stem to Chadds Ford, and Valley Creek (Exton). Five flood-control dams in place.</div></div></li>
+    <li><span class="st ok">done</span><div><b>10-year storm across the whole Brandywine; 24-hour 10 and 100-year storms upstream</b></div></li>
+    <li><span class="st run">running</span><div><b>Ida calibration</b><div class="fine">Radar rainfall done; wet-soil test running. Next: Coatesville and the main stem, checked against the West Branch and Chadds Ford high-water marks.</div></div></li>
+    <li><span class="st run">running</span><div><b>Downingtown 100-year and the Mary Street wetland concept</b><div class="fine">First before-and-after test of a project.</div></div></li>
+    <li><span class="st pend">next</span><div><b>25 and 50-year storms; the Flood Study's priority projects as before-and-after runs</b></div></li>
+    <li><span class="st pend">needs data</span><div><b>As-built outlets for Hibernia, Marsh Creek and Wharton dams</b><div class="fine">The largest remaining unknowns. CCWRA (Hibernia) and DCNR (Marsh Creek) hold the drawings.</div></div></li>
+  </ul></div>
+</div></section>
+
+<!-- ======================= COUNTY PROGRAM ======================= -->
+<section class="page" id="p-program"><div class="split">
+  <div class="panel">
+    <div style="padding:14px 16px 30px">
+      <h2 style="font-size:18px">County program</h2>
+      <div class="fine">Area modeled</div>
+      <div style="height:10px;background:#e8ebf1;border-radius:6px;overflow:hidden;margin:4px 0 2px"><i id="barDone" style="display:block;height:100%;background:var(--done)"></i></div>
+      <div class="fine" id="barText"></div>
+      <div id="pDetail"></div>
+      <div id="pList"></div>
+      <h4>Studies, plans, RFPs &amp; grants</h4>
+      <div class="fine">Other flood work in the county: what it found and what it means for the models. Tap one to see where it is.</div>
+      <div class="filters" id="sfilters"></div>
+      <div id="studies"></div>
+    </div>
+  </div>
+  <div class="mapbox"><div class="map" id="mapP"></div></div>
+</div></section>
+
+<!-- ======================= BRANDYWINE ======================= -->
+<section class="page" id="p-brandywine"><div class="split">
+  <div class="panel">
+    <div class="ptabs" id="btabs">
+      <button data-t="sum" class="on">Summary</button><button data-t="dtn">Downingtown</button><button data-t="bfs">Flood Study</button><button data-t="dam">Dams</button><button data-t="run">Runs</button>
+    </div>
+    <div class="pp on" id="b-sum">
+      <h3>Brandywine above Chadds Ford</h3>
+      <p>Six linked models cover 292 sq mi. Upstream outflows feed the next model down: Upper East Branch and Valley Creek into Downingtown, Buck &amp; Doe Run into Coatesville, and both branches into the main stem.</p>
+      <div class="kp" id="bKpis"></div>
+      <div class="fine" id="bKpiNote"></div>
+      <h4>Models</h4>
+      <div class="tw"><table id="tModels"></table></div>
+      <p class="fine">Tap a model to zoom to it. Storms not yet run for a model show no flooding there; that does not mean it stays dry.</p>
+    </div>
+    <div class="pp" id="b-dtn">
+      <h3>Downingtown</h3>
+      <p>The Borough's May 2026 RFP (awarded to GEI Consultants) calls for modeling of the 10, 25, 50 and 100-year storms and Ida, then ten capital projects with concepts, costs and a ranking. The models supply the flood mapping and before-and-after testing; concepts, costs and ranking remain GEI's. <a href="https://www.downingtown.org/DocumentCenter/View/662/RFP-Flood-Mitigation-Planning-Engineering-Analysis-and-Project-Prioritization-Study-5-6-26" target="_blank" rel="noopener">Read the RFP ↗</a></p>
+      <div class="tw"><table id="tRfp"></table></div>
+      <h4>Flood points</h4>
+      <p class="fine" style="margin-top:0">Water surface elevation (ft NAVD88). Tap a row to zoom.</p>
+      <div class="tw"><table id="tDt"></table></div>
+      <h4>Buildings touched by water (0.5 ft or more alongside)</h4>
+      <div class="tw"><table id="tBld"></table></div>
+      <p class="fine">A screening count of footprints with water alongside, not a first-floor damage count.</p>
+      <h4>Mary Street wetland concept</h4>
+      <p>About 40 acres of Beaver Creek floodplain upstream of Mary Street lowered 1.5 ft on average (up to 3.5 ft, about 100,000 cubic yards), kept 40 ft from buildings and 35 ft from roads. Drawn on open floodplain, not the actual buyout parcels; it lines up with the Borough's $375,000 LSA grant for Beaver Creek at Mary Street (<a href="https://citizenportal.ai/articles/9750332/Pennsylvania/Chester-County/Downingtown/Flood-Advisory-Committee-advances-draft-RFP-and-folds-375000-LSA-grant-into-study-scope" target="_blank" rel="noopener">source ↗</a>). The 100-year test is running; the footprint is on the map. The Flood Advisory Committee's other ideas are listed in <a href="https://www.downingtown.org/DocumentCenter/View/665" target="_blank" rel="noopener">its project list ↗</a>.</p>
+    </div>
+    <div class="pp" id="b-bfs">
+      <h3>2025 Brandywine Flood Study</h3>
+      <p>Prepared by the Brandywine Conservancy, CCWRA and the University of Delaware Water Resources Center (<a href="https://issuu.com/thebrandywine/docs/brandywine_flood_study_report" target="_blank" rel="noopener">final report ↗</a>, <a href="https://www.brandywine.org/sites/default/files/2025-01/Brandywine%20Flood%20Study_FullTechnical%20DRAFT_1.16.25.pdf" target="_blank" rel="noopener">technical report ↗</a>). The models add 2D flood mapping and a way to test the Study's recommendations before they are built.</p>
+      <h4>Priority projects in Pennsylvania</h4>
+      <p class="fine" style="margin-top:0">All twelve sit inside a model and can be tested as before-and-after runs. Tap a row to zoom.</p>
+      <div class="tw"><table id="tProj"></table></div>
+      <h4>Gauge flood-stage recommendations</h4>
+      <div class="tw"><table id="tGage"></table></div>
+      <p class="fine">The Study recommends new or revised NWS flood stages at nine gauges. The models can tie each stage to the roads and buildings that flood at that level.</p>
+      <p class="fine">Flow and Ida comparisons are on the <a href="#checks">Checks</a> page.</p>
+    </div>
+    <div class="pp" id="b-dam">
+      <h3>Flood-control dams</h3>
+      <p class="fine" style="margin-top:0">Peak pool elevation (ft) and outflow (cfs). Coatesville and Downingtown values fill in as those runs finish.</p>
+      <div class="tw"><table id="tDam"></table></div>
+      <div class="warnbox">Outlets for Hibernia, Marsh Creek and Wharton are assumed until as-built data is in hand. In Ida, the Marsh Creek pool rose 2.3 ft in the model against about 6 ft observed, which is consistent with the low upstream runoff on the Checks page.</div>
+    </div>
+    <div class="pp" id="b-run">
+      <h3>Model runs</h3>
+      <p class="fine" style="margin-top:0">Outlet hydrograph for the storm picked on the map. Pick a model:</p>
+      <select id="runSel" style="font:14px system-ui;padding:6px;border:1px solid var(--line);border-radius:6px;width:100%"></select>
+      <div class="chartbox"><canvas id="hyd"></canvas></div>
+      <div class="tw"><table id="tRun"></table></div>
+    </div>
+  </div>
+  <div class="mapbox"><div class="map" id="mapB"></div>
+    <div class="ctl" id="ctlB">
+      <div class="t" style="font-weight:700">Storm</div>
+      <select id="storm"></select>
+      <div class="cov" id="cov"></div>
+      <button class="lbtn" id="lbtn" type="button">Layers ▾</button>
+      <div class="rest">
+        <label><input type="checkbox" id="lDepth" checked> Flood depth</label>
+        <label><input type="checkbox" id="lBld"> Buildings touched</label>
+        <label><input type="checkbox" id="lProj" checked> Flood Study projects</label>
+        <label><input type="checkbox" id="lDam" checked> Dams</label>
+        <label><input type="checkbox" id="lGauge" checked> USGS gauges</label>
+        <label><input type="checkbox" id="lHwm"> Ida high-water marks</label>
+        <label><input type="checkbox" id="lMary" checked> Mary St wetland concept</label>
+        <div class="leg fine" style="margin-top:6px"><i style="background:#c6dbef"></i>0.5–1 ft <i style="background:#6baed6"></i>2–4 <i style="background:#08519c"></i>8+ ft</div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ======================= CHECKS ======================= -->
+<section class="page" id="p-checks"><div class="wrap">
+  <h2>Checks against gauges and marks</h2>
+  <p class="lead">A model is only as useful as its match to what was measured. These are the three tests so far, and where each stands.</p>
+
+  <h3>1. Flows: gauge records, the Flood Study and the model</h3>
+  <div class="tw"><table id="cFlow"></table></div>
+  <p class="fine">Gauge values are a quick Log-Pearson III fit to USGS annual peaks through 2022 (<a href="https://doi.org/10.3133/tm4B5" target="_blank" rel="noopener">Bulletin 17C method ↗</a>), not official USGS frequency flows. Model design storms are 24-hour SCS Type II with NOAA Atlas 14 depths.</p>
+  <div class="note">The 100-year agrees with the gauge record at Dowlin Forge; the 10-year runs about a quarter low. FEMA's 100-year in the Flood Study sits well below both the gauge record and the model at this site.</div>
+
+  <h3>2. Ida rainfall: radar against the Flood Study's rain gauges</h3>
+  <div class="tw"><table id="cRain"></table></div>
+  <p class="fine">Heaviest 6 hours, inches. Radar is NOAA MRMS gauge-corrected hourly rainfall (<a href="https://www.nssl.noaa.gov/projects/mrms/" target="_blank" rel="noopener">MRMS ↗</a>). Gauge totals from the Flood Study.</p>
+
+  <h3>3. Ida water levels and peak flows</h3>
+  <div class="tw"><table id="cHwm"></table></div>
+  <div class="tw" style="margin-top:12px"><table id="cIdaQ"></table></div>
+  <div class="warnbox">With rainfall checked, the 3–4 ft shortfall at every mark points to runoff, not rain: most likely ground already soaked by Tropical Storm Henri a week earlier. A wet-soil run of the Upper East Branch is under way, with a morning rain band (about 0.3–0.4 in) that the first run left out.</div>
+</div></section>
+
+<!-- ======================= SOURCES ======================= -->
+<section class="page" id="p-sources"><div class="wrap">
+  <h2>Sources &amp; methods</h2>
+
+  <h3>How the models are built</h3>
+  <div class="card"><ul style="margin:0;padding-left:18px">
+    <li>HEC-RAS 7.0.1, 2D rain-on-grid: rain falls on every cell and runs off over 1-meter lidar terrain.</li>
+    <li>Losses use SCS curve numbers from county land cover and SSURGO soils; roughness from land cover.</li>
+    <li>Culverts and bridges are cut into the terrain; flood-control dams are modeled as embankments with their spillways.</li>
+    <li>Models are linked: each upstream model's outflow is the next one's inflow.</li>
+    <li>Design storms use NOAA Atlas 14 depths with an SCS Type II pattern; Ida uses NOAA MRMS radar rainfall, hour by hour.</li>
+    <li>Long runs are computed in the cloud on NEER; tests run on a local workstation.</li>
+  </ul></div>
+
+  <h3>Limits</h3>
+  <div class="card"><ul style="margin:0;padding-left:18px">
+    <li>Screening-level results, not regulatory flood maps.</li>
+    <li>Storm sewers are modeled only in Valley Creek (Exton), so street ponding elsewhere is approximate.</li>
+    <li>Some culvert sizes and three dam outlets (Hibernia, Marsh Creek, Wharton) are assumed.</li>
+    <li>Building counts are footprints with water alongside, not first-floor elevations.</li>
+    <li>Not every storm has been run for every model yet; the Brandywine map says which models each storm covers.</li>
+  </ul></div>
+
+  <h3>Studies, plans and documents</h3>
+  <div class="card"><ul class="src">
+    <li><a href="https://issuu.com/thebrandywine/docs/brandywine_flood_study_report" target="_blank" rel="noopener">Brandywine Flood Study, final report (2025)</a><div class="what">Brandywine Conservancy, CCWRA, University of Delaware Water Resources Center. Reference flows, Ida high-water marks and rainfall, dams, priority projects, gauge recommendations.</div></li>
+    <li><a href="https://www.brandywine.org/sites/default/files/2025-01/Brandywine%20Flood%20Study_FullTechnical%20DRAFT_1.16.25.pdf" target="_blank" rel="noopener">Brandywine Flood Study, full technical report (public draft, Jan 2025)</a> · <a href="https://brandywine.org/sites/default/files/2025-01/BrandywineFloodStudy_SummaryReportDRAFT_1.16.25.pdf" target="_blank" rel="noopener">summary report draft</a></li>
+    <li><a href="https://www.downingtown.org/DocumentCenter/View/662/RFP-Flood-Mitigation-Planning-Engineering-Analysis-and-Project-Prioritization-Study-5-6-26" target="_blank" rel="noopener">Downingtown RFP: Flood Mitigation Planning, Engineering Analysis and Project Prioritization (May 2026)</a></li>
+    <li><a href="https://www.downingtown.org/DocumentCenter/View/665" target="_blank" rel="noopener">Downingtown Flood Advisory Committee project ideas</a></li>
+    <li><a href="https://doi.org/10.3133/sir20235086" target="_blank" rel="noopener">USGS Scientific Investigations Report 2023-5086: Ida peak streamflows in Pennsylvania</a></li>
+    <li><a href="https://storymaps.arcgis.com/stories/7c85bb3a588a4f0bbb985ff923373a3d" target="_blank" rel="noopener">Beaver Creek Dam rehabilitation (NRCS / CCWRA story map)</a> · <a href="https://watershedcoalition.org/wp-content/uploads/2021/11/Hibernia-Dam-Rehabilitation-Project-PA.pdf" target="_blank" rel="noopener">Hibernia Dam rehabilitation fact sheet</a></li>
+    <li>More county studies, plans, RFPs and grants are on the <a href="#program">County program</a> map, each with a link.</li>
+  </ul></div>
+
+  <h3>Data</h3>
+  <div class="card"><ul class="src">
+    <li><a href="https://waterdata.usgs.gov/monitoring-location/01480700/" target="_blank" rel="noopener">USGS gauges</a> (annual peaks: <a href="https://nwis.waterdata.usgs.gov/nwis/peak?site_no=01480700" target="_blank" rel="noopener">Dowlin Forge</a>, <a href="https://nwis.waterdata.usgs.gov/nwis/peak?site_no=01480870" target="_blank" rel="noopener">below Downingtown</a>, <a href="https://nwis.waterdata.usgs.gov/nwis/peak?site_no=01480617" target="_blank" rel="noopener">Modena</a>, <a href="https://nwis.waterdata.usgs.gov/nwis/peak?site_no=01481000" target="_blank" rel="noopener">Chadds Ford</a>)<div class="what">Flow records for calibration; CCWRA and USGS have run a cooperative gauge program in the county since 1969 (<a href="https://www.usgs.gov/centers/pa-water/science/chester-county-studies" target="_blank" rel="noopener">USGS ↗</a>).</div></li>
+    <li><a href="https://registry.opendata.aws/noaa-mrms-pds/" target="_blank" rel="noopener">NOAA MRMS radar rainfall</a><div class="what">Gauge-corrected hourly rainfall (MultiSensor QPE Pass 2) for Ida, Sept 1–2, 2021.</div></li>
+    <li><a href="https://hdsc.nws.noaa.gov/pfds/" target="_blank" rel="noopener">NOAA Atlas 14 precipitation frequency</a><div class="what">Design storm depths.</div></li>
+    <li><a href="https://www.usgs.gov/3d-elevation-program" target="_blank" rel="noopener">USGS 3D Elevation Program lidar</a><div class="what">1-meter terrain.</div></li>
+    <li><a href="https://data-chesco.opendata.arcgis.com/" target="_blank" rel="noopener">Chester County open data</a><div class="what">Land cover, impervious surfaces and building footprints, roads, streams, municipalities.</div></li>
+    <li><a href="https://websoilsurvey.nrcs.usda.gov/" target="_blank" rel="noopener">NRCS SSURGO soils</a><div class="what">Hydrologic soil groups.</div></li>
+    <li><a href="https://www.fema.gov/flood-maps/national-flood-hazard-layer" target="_blank" rel="noopener">FEMA National Flood Hazard Layer</a><div class="what">Effective flood zones, for comparison.</div></li>
+  </ul></div>
+
+  <h3>Tools</h3>
+  <div class="card"><ul class="src">
+    <li><a href="https://www.hec.usace.army.mil/software/hec-ras/" target="_blank" rel="noopener">HEC-RAS (US Army Corps of Engineers)</a></li>
+    <li><a href="https://github.com/gpt-cmdr/ras-commander" target="_blank" rel="noopener">ras-commander</a><div class="what">Used to load radar rainfall into HEC-RAS.</div></li>
+    <li><a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a> and <a href="https://www.chartjs.org/" target="_blank" rel="noopener">Chart.js</a> for these pages; basemaps from Esri.</li>
+  </ul></div>
+
+  <h3>Keeping this page current</h3>
+  <div class="card fine" style="font-size:13.5px">Model status lives in <code>County/data/program.json</code> and the studies list in <code>County/data/studies.json</code>. Brandywine results come from <code>County/results/results.json</code>, rebuilt from each model run. Code and data: <a href="https://github.com/scott-jeffers/exton-stormwater" target="_blank" rel="noopener">github.com/scott-jeffers/exton-stormwater</a>.</div>
+</div></section>
+
 <script>
-const PHASES = [
-  {phase:0, label:'Modeled', color:'var(--done)', hideInList:true},
-  {phase:1, label:'Phase 1: Brandywine chain (top-down)', color:'var(--p1)'},
-  {phase:2, label:'Phase 2: Schuylkill towns', color:'var(--p2)'},
-  {phase:3, label:'Phase 3: Christina, eastern creeks, Schuylkill tributaries', color:'var(--p3)'},
-  {phase:4, label:'Phase 4: rural south-west', color:'var(--p4)'},
-];
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v.replace(/var\((.*)\)/,'$1')).trim() || v;
-const colorFor = m => m.status === 'In progress' ? css('var(--prog)') : m.status === 'Next' ? css('var(--next)') : css(PHASES.find(p => p.phase === m.phase)?.color || 'var(--p4)');
-const STYPE = {Study: '#0f766e', RFP: '#c2410c', Plan: '#6d28d9', Grant: '#ca8a04'};
+'use strict';
+// =================================================================== shared
+const $ = id => document.getElementById(id);
+const fmt = n => n == null ? '–' : Math.round(n).toLocaleString();
+const pct = (a, b) => { if (a == null || !b) return '–'; const d = (a - b) / b * 100; const c = Math.abs(d) <= 15 ? 'pos' : Math.abs(d) <= 35 ? 'mid' : 'neg'; return `<span class="${c}">${d > 0 ? '+' : ''}${d.toFixed(0)}%</span>`; };
+const st = (c, t) => `<span class="st ${c}">${t}</span>`;
+const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const get = u => fetch(u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now()).then(r => r.json());
+const isPhone = () => window.innerWidth <= 900;
+const base = () => [
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri, HERE, Garmin, OpenStreetMap', maxNativeZoom: 16, maxZoom: 19}),
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {maxNativeZoom: 16, maxZoom: 19, pane: 'shadowPane'})];
+$('draft').onclick = e => e.currentTarget.classList.toggle('open');
 
-const map = L.map('map', {zoomControl: true}).setView([39.98, -75.75], 10);
-const light = L.layerGroup([
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri, HERE, Garmin, OpenStreetMap', maxZoom: 16}),
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {maxZoom: 16, pane: 'shadowPane'})
-]).addTo(map);
-const imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri World Imagery', maxZoom: 19});
+// ---- Brandywine reference data
+const MODELNAME = {M01: 'Valley Creek (Exton)', M03: 'Upper East Branch', M12: 'Buck & Doe Run', M02: 'Downingtown', M04: 'Coatesville', M05: 'Main stem'};
+const MODELORDER = ['M03', 'M01', 'M12', 'M02', 'M04', 'M05'];
+const STORMS = [{id: 'p19', name: 'Ida, Sept 1 2021 (radar rain)'}, {id: 'p17', name: '100-year, 24-hr storm'}, {id: 'p14', name: '10-year, 24-hr storm'}, {id: 'p03', name: '10-year, 6-hr storm'}];
+const PROJ = [ // 2025 Flood Study priority projects in PA; last field 1 = location approximate
+ ['Main stem','East Penn Railroad bridge replacement','Chadds Ford/Pennsbury','High','M05',39.8706,-75.5941,1],
+ ['Main stem','US Rte 1 bridge replacement','Chadds Ford/Pennsbury','High','M05',39.8716,-75.5933,1],
+ ['Main stem','PA Dam No. 1 removal','Chadds Ford/Pennsbury','Low','M05',39.8724,-75.5926,1],
+ ['Main stem','Conservancy floodplain restoration','Chadds Ford/Pennsbury','Medium','M05',39.8734,-75.5917,1],
+ ['East Branch','Rte 322 bridge replacement','East Bradford','Low','M02',39.99498,-75.69899,0],
+ ['East Branch','Rte 30 Bus./Lancaster Ave bridge replacement','Downingtown','High','M02',40.00589,-75.70518,0],
+ ['East Branch','Barneston Dam upgrades (labyrinth weir)','Wallace','High','M03',40.10164,-75.7902,0],
+ ['West Branch','Reading Wilm. Northern RR bridge replacement','Modena','Medium','M04',39.9626,-75.8009,1],
+ ['West Branch','Cleveland Cliffs rail bridge replacement','South Coatesville','Low','M04',39.9729,-75.8172,1],
+ ['West Branch','East Glencrest Rd bridge replacement','Valley','Low','M04',39.98641,-75.82722,0],
+ ['Beaver Creek','Lloyd Ave bridge replacement','Caln','Low','M02',40.00319,-75.72457,0],
+ ['Beaver Creek','Manor Ave bridge replacement','Downingtown','High','M02',40.00752,-75.71178,0]];
+const DAMS = [
+ ['Barneston','East Branch (Wallace)','Dry dam','M03','Study: modeled 100-yr outflow 1,297 cfs',40.10164,-75.7902],
+ ['Marsh Creek Reservoir','Marsh Creek','Impoundment','M03','Study: Ida outflow ~369 cfs, pool ~365.5 ft (+6 ft)',40.05538,-75.71685],
+ ['Wharton Blvd','Marsh Creek tributary','Stormwater dam','M03','Not in the Study',40.05974,-75.68335],
+ ['Beaver Creek','Beaver Creek','Dry dam','M02','Study: restricts flow up to the 100-yr (rehab 2021–22)',40.03065,-75.78235],
+ ['Hibernia (Chambers Lake)','Birch Run','Impoundment','M04','Study: restricts flow up to the 100-yr (rehab 2020)',40.02854,-75.84878]];
+const GAUGES = [ // id, name, lat, lon, Study recommendation, gauge-record Q10, Q100, Ida peak
+ ['01480300','West Branch near Honey Brook',40.0728,-75.8611,'Review/revise NWS flood stage',3071,6300,null],
+ ['01480500','West Branch at Coatesville',39.9857,-75.8274,'Review/revise NWS flood stage',5115,11746,null],
+ ['01480617','West Branch at Modena',39.9618,-75.8013,'Review/revise NWS flood stage',6440,14155,12300],
+ ['01480675','Marsh Creek near Glenmoore',40.0978,-75.7416,'',531,1029,null],
+ ['01480700','East Branch near Downingtown (Dowlin Forge)',40.0347,-75.7085,'Develop a new NWS flood stage',5505,11591,16100],
+ ['01480870','East Branch below Downingtown',39.9687,-75.6733,'Review/revise NWS flood stage',7578,14861,21000],
+ ['01481000','Brandywine Creek at Chadds Ford',39.8697,-75.5935,'Review/revise NWS flood stage',15434,31913,49000]];
+const HWM = [ // name, lat, lon, Ida mark, FEMA 100-yr, model even rain, model radar
+ ['Rte 322 (Downingtown Pike)',39.99498,-75.69899,232.5,224.7,228.2,229.3],
+ ['Pennsylvania Ave',40.00686,-75.70633,241.5,237.5,237.3,237.8],
+ ['Rte 282 (Wallace Ave)',40.01438,-75.70467,248.0,246.3,244.2,244.2],
+ ['Rte 30 Bypass',40.01763,-75.70689,255.1,251.7,251.0,251.1],
+ ['Dowlin Forge Rd (USGS 01480700)',40.03487,-75.70852,270.8,266.2,266.9,266.8]];
+const RAIN = [['Modena',7.02,7.10],['Chester Springs',6.18,6.31],['Glenmoore (Marsh Creek)',4.99,5.04],['EB below Downingtown',5.83,6.20],['Marshallton',5.25,6.18],['Chambers Lake (Hibernia)',5.82,4.60],['Chadds Ford',3.28,2.70]];
+const usgsLink = id => `<a href="https://waterdata.usgs.gov/monitoring-location/${id}/" target="_blank" rel="noopener">USGS ${id}</a>`;
 
-Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_outline.geojson', 'usgs_gauges.geojson', 'noaa_gauges.geojson', 'flow_links.geojson', 'studies.json']
-  .map(f => get('data/' + f))).then(([prog, models, sheds, county, usgs, noaa, links, studies]) => {
-  const P = prog.models;
-  models.features.forEach(f => Object.assign(f.properties, P[f.properties.model_id] || {}));
-  const total = models.features.reduce((s, f) => s + f.properties.sq_mi, 0);
-  const doneSq = models.features.filter(f => f.properties.phase === 0).reduce((s, f) => s + f.properties.sq_mi, 0);
-  const nDone = models.features.filter(f => f.properties.phase === 0).length;
-  const nFc = noaa.features.filter(f => f.properties.forecast_point === 'Yes').length;
-  document.getElementById('kpis').innerHTML =
-    `<div class="kpi"><b>${nDone} of ${models.features.length}</b><span>models done</span></div>` +
-    `<div class="kpi"><b>${doneSq.toFixed(0)} / ${total.toFixed(0)}</b><span>sq mi modeled</span></div>` +
-    `<div class="kpi"><b>${usgs.features.length}</b><span>USGS gauges</span></div>` +
-    `<div class="kpi"><b>${nFc}</b><span>NOAA forecast points</span></div>` +
-    `<div class="kpi"><b>${studies.items.length}</b><span>studies, plans &amp; RFPs</span></div>`;
-  document.getElementById('barDone').style.width = (doneSq / total * 100).toFixed(1) + '%';
-  document.getElementById('barText').textContent = `${(doneSq / total * 100).toFixed(1)}% of ${total.toFixed(0)} sq mi`;
+let R = null;   // Brandywine results
+const results = get('results/results.json').then(j => (R = j));
 
-  // watersheds filled by their model's status
-  const byId = {}; models.features.forEach(f => byId[f.properties.model_id] = f.properties);
-  const shedLayer = L.geoJSON(sheds, {
-    style: f => ({color: '#fff', weight: 1, fillColor: colorFor(byId[f.properties.model_id]), fillOpacity: .55}),
-    onEachFeature: (f, l) => l.bindTooltip(`${f.properties.watershed} (${f.properties.sq_mi} sq mi)<br><b>${byId[f.properties.model_id].model}</b>`, {sticky: true})
-  }).addTo(map);
-  const modelLayers = {};
-  const modelLayer = L.geoJSON(models, {
-    style: {color: '#1f2937', weight: 2.2, fill: true, fillOpacity: 0},
-    onEachFeature: (f, l) => { modelLayers[f.properties.model_id] = l; l.on('click', () => select(f.properties.model_id)); }
-  }).addTo(map);
-  // arrows: which model feeds which (top-down build order)
-  const flowLayer = L.layerGroup().addTo(map);
-  links.features.forEach(f => {
-    const ll = f.geometry.coordinates.map(([x, y]) => [y, x]);
-    L.polyline(ll, {color: '#111', weight: 2.5, dashArray: '6 4', interactive: false}).addTo(flowLayer);
-    const [a, b] = ll, ang = Math.atan2(b[0] - a[0], b[1] - a[1]) * 180 / Math.PI;
-    L.marker(b, {interactive: false, icon: L.divIcon({className: '', iconSize: [18, 18], iconAnchor: [9, 9],
-      html: `<div style="transform:rotate(${-ang}deg);font-size:18px;line-height:18px;color:#111">&#10148;</div>`})}).addTo(flowLayer);
+// =================================================================== router
+const inited = {};
+function show(page, sub) {
+  if (!$('p-' + page)) page = 'overview';
+  document.querySelectorAll('section.page').forEach(s => s.classList.toggle('on', s.id === 'p-' + page));
+  document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('on', a.dataset.p === page));
+  if (!inited[page]) { inited[page] = true; ({overview: initOverview, program: initProgram, brandywine: initBrandywine, checks: initChecks}[page] || (() => {}))(); }
+  if (page === 'brandywine' && sub) bTab(sub);
+  setTimeout(() => { if (page === 'program' && window._mapP) _mapP.invalidateSize(); if (page === 'brandywine' && window._mapB) _mapB.invalidateSize(); }, 50);
+}
+function route() {
+  const h = location.hash.slice(1);
+  if (h === 'dashboards') { show('overview'); setTimeout(() => $('dashboards').scrollIntoView({behavior: 'smooth'}), 60); return; }
+  const [page, sub] = h.split('/'); show(page || 'overview', sub); if (!sub) window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
+
+// =================================================================== overview
+function initOverview() {
+  Promise.all([get('data/program.json'), get('data/models.geojson'), get('data/studies.json'), results]).then(([prog, models, studies]) => {
+    const P = prog.models, total = models.features.reduce((s, f) => s + f.properties.sq_mi, 0);
+    const done = Object.values(P).filter(m => m.status !== 'Planned' && m.status !== 'Next').length;
+    $('ovKpis').innerHTML =
+      `<div class="card kpi"><b>${done} of ${models.features.length}</b><span>models built or in progress</span></div>` +
+      `<div class="card kpi"><b>292 sq mi</b><span>of the Brandywine modeled, of ${Math.round(total)} sq mi county-wide</span></div>` +
+      `<div class="card kpi"><b>5</b><span>flood-control dams in the models</span></div>` +
+      `<div class="card kpi"><b>${studies.items.length}</b><span>studies, plans, RFPs and grants tracked</span></div>`;
   });
-  const countyLayer = L.geoJSON(county, {style: {color: '#111', weight: 3.5, fill: false}, interactive: false}).addTo(map);
-  map.fitBounds(countyLayer.getBounds(), {padding: [10, 10]});
+}
 
-  // gauges sit in their own pane above the watershed outlines
-  map.createPane('gauges'); map.getPane('gauges').style.zIndex = 650;
-  const usgsLayer = L.layerGroup().addTo(map), noaaLayer = L.layerGroup().addTo(map);
-  usgs.features.forEach(f => {
-    const p = f.properties, [x, y] = f.geometry.coordinates;
-    const m = L.circleMarker([y, x], {pane: 'gauges', radius: 5, color: '#fff', weight: 1.5, fillColor: '#1d4ed8', fillOpacity: 1}).addTo(usgsLayer);
-    m.bindPopup(`<b>USGS ${p.usgs_id}</b><br>${p.name}<div id="u${p.usgs_id}" class="small">Loading latest reading…</div><a href="${p.usgs_page}" target="_blank">USGS page</a>`);
-    m.on('popupopen', () => latestUSGS(p.usgs_id));
+// =================================================================== county program
+function initProgram() {
+  const PHASES = [
+    {phase: 0, label: 'Modeled', color: 'var(--done)', hideInList: true},
+    {phase: 1, label: 'Phase 1: Brandywine chain (top-down)', color: 'var(--p1)'},
+    {phase: 2, label: 'Phase 2: Schuylkill towns', color: 'var(--p2)'},
+    {phase: 3, label: 'Phase 3: Christina, eastern creeks, Schuylkill tributaries', color: 'var(--p3)'},
+    {phase: 4, label: 'Phase 4: rural south-west', color: 'var(--p4)'}];
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v.replace(/var\((.*)\)/, '$1')).trim() || v;
+  const colorFor = m => m.status === 'In progress' ? css('var(--prog)') : m.status === 'Next' ? css('var(--next)') : css(PHASES.find(p => p.phase === m.phase)?.color || 'var(--p4)');
+  const STYPE = {Study: '#0f766e', RFP: '#c2410c', Plan: '#6d28d9', Grant: '#ca8a04'};
+  const map = window._mapP = L.map('mapP', {zoomControl: true}).setView([39.98, -75.75], 10);
+  const light = L.layerGroup(base()).addTo(map);
+  const imagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: 'Esri World Imagery', maxZoom: 19});
+  Promise.all(['program.json', 'models.geojson', 'watersheds.geojson', 'county_outline.geojson', 'usgs_gauges.geojson', 'noaa_gauges.geojson', 'flow_links.geojson', 'studies.json'].map(f => get('data/' + f)))
+  .then(([prog, models, sheds, county, usgs, noaa, links, studies]) => {
+    const P = prog.models;
+    models.features.forEach(f => Object.assign(f.properties, P[f.properties.model_id] || {}));
+    const total = models.features.reduce((s, f) => s + f.properties.sq_mi, 0);
+    const doneSq = models.features.filter(f => f.properties.phase === 0).reduce((s, f) => s + f.properties.sq_mi, 0);
+    $('barDone').style.width = (doneSq / total * 100).toFixed(1) + '%';
+    $('barText').textContent = `${doneSq.toFixed(0)} of ${total.toFixed(0)} sq mi fully modeled (${(doneSq / total * 100).toFixed(1)}%); the other five Brandywine models (271 sq mi) are in progress`;
+    const byId = {}; models.features.forEach(f => byId[f.properties.model_id] = f.properties);
+    const shedLayer = L.geoJSON(sheds, {style: f => ({color: '#fff', weight: 1, fillColor: colorFor(byId[f.properties.model_id]), fillOpacity: .55}),
+      onEachFeature: (f, l) => l.bindTooltip(`${f.properties.watershed} (${f.properties.sq_mi} sq mi)<br><b>${byId[f.properties.model_id].model}</b>`, {sticky: true})}).addTo(map);
+    const modelLayers = {};
+    const modelLayer = L.geoJSON(models, {style: {color: '#1f2937', weight: 2.2, fill: true, fillOpacity: 0},
+      onEachFeature: (f, l) => { modelLayers[f.properties.model_id] = l; l.on('click', () => select(f.properties.model_id)); }}).addTo(map);
+    const flowLayer = L.layerGroup().addTo(map);
+    links.features.forEach(f => { const ll = f.geometry.coordinates.map(([x, y]) => [y, x]);
+      L.polyline(ll, {color: '#111', weight: 2.5, dashArray: '6 4', interactive: false}).addTo(flowLayer);
+      const [a, b] = ll, ang = Math.atan2(b[0] - a[0], b[1] - a[1]) * 180 / Math.PI;
+      L.marker(b, {interactive: false, icon: L.divIcon({className: '', iconSize: [18, 18], iconAnchor: [9, 9], html: `<div style="transform:rotate(${-ang}deg);font-size:18px;line-height:18px;color:#111">&#10148;</div>`})}).addTo(flowLayer); });
+    const countyLayer = L.geoJSON(county, {style: {color: '#111', weight: 3.5, fill: false}, interactive: false}).addTo(map);
+    map.fitBounds(countyLayer.getBounds(), {padding: [10, 10]});
+    map.createPane('gauges'); map.getPane('gauges').style.zIndex = 650;
+    const usgsLayer = L.layerGroup().addTo(map), noaaLayer = L.layerGroup().addTo(map);
+    usgs.features.forEach(f => { const p = f.properties, [x, y] = f.geometry.coordinates;
+      const m = L.circleMarker([y, x], {pane: 'gauges', radius: 5, color: '#fff', weight: 1.5, fillColor: '#1d4ed8', fillOpacity: 1}).addTo(usgsLayer);
+      m.bindPopup(`<b>USGS ${p.usgs_id}</b><br>${p.name}<div id="u${p.usgs_id}" class="fine">Loading latest reading…</div><a href="${p.usgs_page}" target="_blank" rel="noopener">USGS page</a>`);
+      m.on('popupopen', () => latestUSGS(p.usgs_id)); });
+    noaa.features.forEach(f => { const p = f.properties, [x, y] = f.geometry.coordinates;
+      const m = L.circleMarker([y, x], {pane: 'gauges', radius: p.forecast_point === 'Yes' ? 8 : 6, color: '#fff', weight: 2, fillColor: p.forecast_point === 'Yes' ? '#e11d48' : '#fda4af', fillOpacity: 1}).addTo(noaaLayer);
+      m.bindPopup(`<b>NOAA ${p.lid}</b><br>${p.name}<div id="n${p.lid}" class="fine">Loading status…</div><a href="${p.noaa_page}" target="_blank" rel="noopener">NOAA hydrograph</a>`);
+      m.on('popupopen', () => statusNOAA(p.lid)); });
+    const studyLayer = L.layerGroup().addTo(map), studyMarkers = {};
+    const studyHtml = it => `<span class="chip" style="background:${STYPE[it.type]}">${it.type}</span><b>${esc(it.title)}</b>` +
+      `<div class="fine">${esc(it.org)} · ${esc(it.date)}<br><i>${esc(it.status)}</i></div><p style="margin:6px 0">${esc(it.summary)}</p>` +
+      `<p style="margin:6px 0"><b>For the models:</b> ${esc(it.for_us)}</p>` +
+      `<div class="fine">Models: ${it.models.map(m => byId[m] ? byId[m].model : m).join(', ')}</div><a href="${it.url}" target="_blank" rel="noopener">Open source document ↗</a>`;
+    studies.items.forEach(it => { if (it.lat == null) return;
+      const m = L.marker([it.lat, it.lon], {pane: 'gauges', icon: L.divIcon({className: '', iconSize: [16, 16], iconAnchor: [8, 8],
+        html: `<div style="width:13px;height:13px;transform:rotate(45deg);background:${STYPE[it.type]};border:2px solid #fff;box-shadow:0 0 0 1px #555"></div>`})}).addTo(studyLayer);
+      m.bindPopup(studyHtml(it), {maxWidth: 340}); studyMarkers[it.id] = m; });
+    let sFilter = 'All';
+    const openStudy = sid => { const it = studies.items.find(x => x.id === sid), mk = studyMarkers[sid];
+      if (isPhone()) window.scrollTo({top: 0, behavior: 'smooth'});
+      if (mk) { map.setView(mk.getLatLng(), Math.max(map.getZoom(), 12)); mk.openPopup(); }
+      else L.popup({maxWidth: 340}).setLatLng(map.getCenter()).setContent(studyHtml(it)).openOn(map); };
+    const renderStudies = () => { const box = $('studies');
+      box.innerHTML = studies.items.filter(it => sFilter === 'All' || it.type === sFilter).map(it =>
+        `<div class="study" data-sid="${it.id}"><span class="chip" style="background:${STYPE[it.type]}">${it.type}</span><b>${esc(it.title)}</b><div class="fine">${esc(it.date)} · ${esc(it.status)}</div></div>`).join('');
+      box.querySelectorAll('.study').forEach(el => el.onclick = () => openStudy(el.dataset.sid)); };
+    $('sfilters').innerHTML = ['All', ...Object.keys(STYPE)].map(t => `<button data-t="${t}" class="${t === 'All' ? 'on' : ''}">${t}</button>`).join('');
+    document.querySelectorAll('#sfilters button').forEach(b => b.onclick = () => { sFilter = b.dataset.t; document.querySelectorAll('#sfilters button').forEach(x => x.classList.toggle('on', x === b)); renderStudies(); });
+    renderStudies();
+    L.control.layers({'Light map': light, 'Imagery': imagery}, {'Watersheds by status': shedLayer, 'Model outlines': modelLayer, 'Flow between models': flowLayer, 'County line': countyLayer, 'USGS gauges': usgsLayer, 'NOAA river gauges': noaaLayer, 'Studies, plans & RFPs': studyLayer}, {collapsed: true}).addTo(map);
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = () => { const d = L.DomUtil.create('div', 'legend');
+      d.innerHTML = `<div style="cursor:pointer;font-weight:600" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">Legend ▾</div><div style="${isPhone() ? 'display:none' : ''}">` +
+        PHASES.map(p => `<div><span class="sw" style="background:${css(p.color)}"></span>${p.label}</div>`).join('') +
+        `<div><span class="sw" style="background:${css('var(--prog)')}"></span>In progress</div><div><span class="sw" style="background:${css('var(--next)')}"></span>Next</div>` +
+        `<div>&#10148; feeds the next model</div>` + Object.entries(STYPE).map(([k, c]) => `<div><span class="sw" style="background:${c};transform:rotate(45deg)"></span>${k}</div>`).join('') + `</div>`;
+      return d; };
+    legend.addTo(map);
+    const list = $('pList');
+    PHASES.filter(ph => !ph.hideInList).forEach(ph => {
+      const ms = models.features.map(f => f.properties).filter(p => p.phase === ph.phase || (ph.phase === 1 && p.phase === 0)).sort((a, b) => a.build_order - b.build_order);
+      if (!ms.length) return;
+      list.insertAdjacentHTML('beforeend', `<h4>${ph.label} · ${ms.reduce((s, p) => s + p.sq_mi, 0).toFixed(0)} sq mi</h4>`);
+      ms.forEach(p => list.insertAdjacentHTML('beforeend', `<div class="model" data-id="${p.model_id}"><span class="sw" style="background:${colorFor(p)}"></span><div>` +
+        `<div class="n">${p.model}<span class="tag">${p.sq_mi} sq mi</span>${p.status !== 'Planned' ? `<span class="tag" style="background:${colorFor(p)};color:#fff">${p.status}</span>` : ''}</div><div class="m">${p.towns}</div></div></div>`));
+    });
+    list.querySelectorAll('.model').forEach(el => el.onclick = () => select(el.dataset.id));
+    function select(id) {
+      const p = byId[id], l = modelLayers[id];
+      Object.values(modelLayers).forEach(x => x.setStyle({weight: 2.2, color: '#1f2937'}));
+      l.setStyle({weight: 5, color: '#111'}); l.bringToFront(); map.fitBounds(l.getBounds(), {padding: [30, 30]});
+      document.querySelectorAll('.model').forEach(e => e.classList.toggle('sel', e.dataset.id === id));
+      const rel = studies.items.filter(it => it.models.includes(id) && it.models.length < 10);
+      const d = $('pDetail'); d.style.display = 'block';
+      d.innerHTML = `<h3>${p.model}</h3><div class="fine">${p.status} · ${p.phase === 0 ? 'done' : 'phase ' + p.phase}</div><p style="margin:6px 0">${p.notes}</p>` +
+        `<table class="fine"><tr><td>Area</td><td><b>${p.sq_mi} sq mi</b></td></tr><tr><td>Inflow from</td><td>${p.inflow_from}</td></tr><tr><td>Drains to</td><td>${p.drains_to}</td></tr><tr><td>Towns</td><td>${p.towns}</td></tr><tr><td>Gauges</td><td>${p.usgs_gauges} USGS, ${p.noaa_forecast_points} NOAA forecast</td></tr></table>` +
+        (['M01', 'M02', 'M03', 'M04', 'M05', 'M12'].includes(id) ? `<p style="margin:6px 0"><a href="#brandywine">See Brandywine results →</a></p>` : '') +
+        (p.dashboard ? `<p style="margin:6px 0"><a href="${p.dashboard}" target="_blank" rel="noopener">Open the flood dashboard ↗</a></p>` : '') +
+        (rel.length ? `<div class="fine" style="margin-top:6px"><b>Related studies, plans &amp; RFPs</b></div>` + rel.map(it => `<div class="fine" style="margin:3px 0"><span class="chip" style="background:${STYPE[it.type]}">${it.type}</span><a href="#program" data-s="${it.id}">${esc(it.title)}</a></div>`).join('') : '');
+      d.querySelectorAll('a[data-s]').forEach(a => a.onclick = e => { e.preventDefault(); openStudy(a.dataset.s); });
+      if (isPhone()) window.scrollTo({top: 0, behavior: 'smooth'});
+    }
   });
-  noaa.features.forEach(f => {
-    const p = f.properties, [x, y] = f.geometry.coordinates;
-    const m = L.circleMarker([y, x], {pane: 'gauges', radius: p.forecast_point === 'Yes' ? 8 : 6, color: '#fff', weight: 2, fillColor: p.forecast_point === 'Yes' ? '#e11d48' : '#fda4af', fillOpacity: 1}).addTo(noaaLayer);
-    m.bindPopup(`<b>NOAA ${p.lid}</b><br>${p.name}<div id="n${p.lid}" class="small">Loading status…</div><a href="${p.noaa_page}" target="_blank">NOAA hydrograph</a>`);
-    m.on('popupopen', () => statusNOAA(p.lid));
-  });
-  // studies, plans, RFPs and grants
-  const studyLayer = L.layerGroup().addTo(map), studyMarkers = {};
-  const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  const studyHtml = it => `<span class="stype" style="background:${STYPE[it.type]}">${it.type}</span><b>${esc(it.title)}</b>` +
-    `<div class="small">${esc(it.org)} · ${esc(it.date)}<br><i>${esc(it.status)}</i></div><p style="margin:6px 0">${esc(it.summary)}</p>` +
-    `<p style="margin:6px 0"><b>For our models:</b> ${esc(it.for_us)}</p>` +
-    `<div class="small">Models: ${it.models.map(m => byId[m] ? byId[m].model : m).join(', ')}</div><a href="${it.url}" target="_blank">Open source document</a>`;
-  studies.items.forEach(it => {
-    if (it.lat == null) return;
-    const m = L.marker([it.lat, it.lon], {pane: 'gauges', icon: L.divIcon({className: '', iconSize: [16, 16], iconAnchor: [8, 8],
-      html: `<div style="width:13px;height:13px;transform:rotate(45deg);background:${STYPE[it.type]};border:2px solid #fff;box-shadow:0 0 0 1px #555"></div>`})}).addTo(studyLayer);
-    m.bindPopup(studyHtml(it), {maxWidth: 340}); studyMarkers[it.id] = m;
-  });
-  let sFilter = 'All';
-  const renderStudies = () => {
-    const box = document.getElementById('studies');
-    box.innerHTML = studies.items.filter(it => sFilter === 'All' || it.type === sFilter).map(it =>
-      `<div class="study" data-sid="${it.id}"><span class="stype" style="background:${STYPE[it.type]}">${it.type}</span><span class="t">${esc(it.title)}</span>` +
-      `<div class="small">${esc(it.date)} · ${esc(it.status)}</div></div>`).join('');
-    box.querySelectorAll('.study').forEach(el => el.onclick = () => openStudy(el.dataset.sid));
-  };
-  const openStudy = sid => {
-    const it = studies.items.find(x => x.id === sid), mk = studyMarkers[sid];
-    if (mk) { map.setView(mk.getLatLng(), Math.max(map.getZoom(), 12)); mk.openPopup(); }
-    else L.popup({maxWidth: 340}).setLatLng(map.getCenter()).setContent(studyHtml(it)).openOn(map);
-  };
-  document.getElementById('sfilters').innerHTML = ['All', ...Object.keys(STYPE)].map(t => `<button data-t="${t}" class="${t === 'All' ? 'on' : ''}">${t}</button>`).join('');
-  document.querySelectorAll('#sfilters button').forEach(b => b.onclick = () => {
-    sFilter = b.dataset.t; document.querySelectorAll('#sfilters button').forEach(x => x.classList.toggle('on', x === b)); renderStudies(); });
-  renderStudies();
-  window._studiesFor = id => studies.items.filter(it => it.models.includes(id) && it.models.length < 10);
-  window._openStudy = openStudy;
-
-  L.control.layers({'Light map': light, 'Imagery': imagery},
-    {'Watersheds by status': shedLayer, 'Planned model outlines': modelLayer, 'Flow between models': flowLayer, 'County line': countyLayer, 'USGS gauges': usgsLayer, 'NOAA river gauges': noaaLayer, 'Studies, plans & RFPs': studyLayer},
-    {collapsed: true}).addTo(map);
-
-  const legend = L.control({position: 'bottomright'});
-  legend.onAdd = () => { const d = L.DomUtil.create('div', 'legend');
-    d.innerHTML = PHASES.map(p => `<div><span class="sw" style="background:${css(p.color)}"></span>${p.label}</div>`).join('') +
-      `<div><span class="sw" style="background:${css('var(--prog)')}"></span>In progress</div>` +
-      `<div><span class="sw" style="background:${css('var(--next)')}"></span>Next</div>` +
-      `<div>&#10148; feeds the next model</div>` +
-      `<div><span class="dot" style="background:#1d4ed8"></span>USGS gauge</div><div><span class="dot" style="background:#e11d48"></span>NOAA forecast point</div>` +
-      Object.entries(STYPE).map(([k, c]) => `<div><span class="sq" style="background:${c}"></span>${k}</div>`).join('');
-    return d; };
-  legend.addTo(map);
-
-  // side list grouped by phase
-  const list = document.getElementById('list');
-  PHASES.filter(ph => !ph.hideInList).forEach(ph => {
-    const ms = models.features.map(f => f.properties).filter(p => p.phase === ph.phase || (ph.phase === 1 && p.phase === 0)).sort((a, b) => a.build_order - b.build_order);
-    if (!ms.length) return;
-    list.insertAdjacentHTML('beforeend', `<h2>${ph.label} · ${ms.reduce((s, p) => s + p.sq_mi, 0).toFixed(0)} sq mi</h2>`);
-    ms.forEach(p => list.insertAdjacentHTML('beforeend',
-      `<div class="model" data-id="${p.model_id}"><span class="sw" style="background:${colorFor(p)}"></span><div>` +
-      `<div class="n"><span class="tag" style="margin:0 6px 0 0">#${p.build_order}</span>${p.model}<span class="tag">${p.sq_mi} sq mi</span>${p.status !== 'Planned' ? `<span class="tag" style="background:${colorFor(p)};color:#fff">${p.status}</span>` : ''}</div><div class="m">${p.towns}</div></div></div>`));
-  });
-  list.querySelectorAll('.model').forEach(el => el.onclick = () => select(el.dataset.id));
-
-  function select(id) {
-    const p = byId[id], l = modelLayers[id];
-    Object.values(modelLayers).forEach(x => x.setStyle({weight: 2.2, color: '#1f2937'}));
-    l.setStyle({weight: 5, color: '#111'}); l.bringToFront();
-    map.fitBounds(l.getBounds(), {padding: [30, 30]});
-    document.querySelectorAll('.model').forEach(e => e.classList.toggle('sel', e.dataset.id === id));
-    const d = document.getElementById('detail'); d.style.display = 'block';
-    d.innerHTML = `<h3>${p.model}</h3><div class="small">${p.model_id} · ${p.status} · ${p.phase === 0 ? 'Done' : 'Phase ' + p.phase}</div>` +
-      `<p>${p.notes}</p><table class="small"><tr><td>Area</td><td><b>${p.sq_mi} sq mi</b> (${p.watersheds} HUC-12)</td></tr>` +
-      `<tr><td>Build order</td><td><b>#${p.build_order}</b></td></tr><tr><td>Inflow from</td><td>${p.inflow_from}</td></tr><tr><td>Drains to</td><td>${p.drains_to}</td></tr>` +
-      `<tr><td>Towns</td><td>${p.towns}</td></tr><tr><td>Gauges</td><td>${p.usgs_gauges} USGS, ${p.noaa_forecast_points} NOAA forecast</td></tr></table>` +
-      (p.dashboard ? `<p><a href="${p.dashboard}" target="_blank"><b>Open the flood dashboard</b></a></p>` : '') +
-      (() => { const rel = window._studiesFor(id); return rel.length ? `<div class="small" style="margin-top:8px"><b>Related studies, plans &amp; RFPs</b></div>` +
-        rel.map(it => `<div class="small" style="margin:3px 0"><span class="stype" style="background:${STYPE[it.type]}">${it.type}</span><a href="#" onclick="window._openStudy('${it.id}');return false">${it.title}</a></div>`).join('') : ''; })();
-  }
-});
-
+}
 function latestUSGS(id) {
-  const el = () => document.getElementById('u' + id);
-  fetch(`https://api.waterdata.usgs.gov/ogcapi/v0/collections/latest-continuous/items?f=json&monitoring_location_id=USGS-${id}&limit=20`)
-    .then(r => r.json()).then(j => {
-      const v = {}; j.features.forEach(f => v[f.properties.parameter_code] = f.properties);
-      const s = v['00065'], q = v['00060'];
-      if (el()) el().innerHTML = (s ? `Stage <b>${s.value} ft</b>` : '') + (q ? ` · Flow <b>${q.value} cfs</b>` : '') +
-        ((s || q) ? `<br>${new Date((s || q).time).toLocaleString()}` : 'No recent reading');
-    }).catch(() => { if (el()) el().textContent = 'Could not reach USGS'; });
+  const el = () => $('u' + id);
+  fetch(`https://api.waterdata.usgs.gov/ogcapi/v0/collections/latest-continuous/items?f=json&monitoring_location_id=USGS-${id}&limit=20`).then(r => r.json()).then(j => {
+    const v = {}; j.features.forEach(f => v[f.properties.parameter_code] = f.properties); const s = v['00065'], q = v['00060'];
+    if (el()) el().innerHTML = (s ? `Stage <b>${s.value} ft</b>` : '') + (q ? ` · Flow <b>${q.value} cfs</b>` : '') + ((s || q) ? `<br>${new Date((s || q).time).toLocaleString()}` : 'No recent reading');
+  }).catch(() => { if (el()) el().textContent = 'Could not reach USGS'; });
 }
 function statusNOAA(lid) {
-  const el = () => document.getElementById('n' + lid);
+  const el = () => $('n' + lid);
   fetch(`https://api.water.noaa.gov/nwps/v1/gauges/${lid}`).then(r => r.json()).then(g => {
     const o = g.status?.observed, f = g.status?.forecast;
-    const fmt = x => x && x.primary > -999 ? `${x.primary} ${x.primaryUnit} (${x.floodCategory === 'no_flooding' ? 'no flooding' : x.floodCategory})` : 'none';
-    if (el()) el().innerHTML = `Now: <b>${fmt(o)}</b><br>Forecast crest: <b>${fmt(f)}</b>`;
+    const f2 = x => x && x.primary > -999 ? `${x.primary} ${x.primaryUnit} (${x.floodCategory === 'no_flooding' ? 'no flooding' : x.floodCategory})` : 'none';
+    if (el()) el().innerHTML = `Now: <b>${f2(o)}</b><br>Forecast crest: <b>${f2(f)}</b>`;
   }).catch(() => { if (el()) el().textContent = 'Could not reach NOAA'; });
 }
+
+// =================================================================== Brandywine
+let chart = null;
+function bTab(t) {
+  document.querySelectorAll('#btabs button').forEach(x => x.classList.toggle('on', x.dataset.t === t));
+  document.querySelectorAll('#p-brandywine .pp').forEach(p => p.classList.toggle('on', p.id === 'b-' + t));
+  if (t === 'run') drawRun();
+}
+function initBrandywine() {
+  document.querySelectorAll('#btabs button').forEach(b => b.onclick = () => bTab(b.dataset.t));
+  $('lbtn').onclick = () => { const c = $('ctlB'); c.classList.toggle('open'); $('lbtn').textContent = c.classList.contains('open') ? 'Layers ▴' : 'Layers ▾'; };
+  const map = window._mapB = L.map('mapB').setView([39.99, -75.74], 11);
+  base().forEach(l => l.addTo(map));
+  const icon = (c, round) => L.divIcon({className: '', html: `<div class="mk" style="background:${c};${round ? 'border-radius:50%' : ''}"></div>`, iconSize: [14, 14]});
+  const projL = L.layerGroup(PROJ.map(p => L.marker([p[5], p[6]], {icon: icon(p[3] === 'High' ? '#b91c1c' : p[3] === 'Medium' ? '#d97706' : '#64748b')}).bindPopup(`<b>${p[1]}</b><br>${p[0]} · ${p[2]}<br>Flood Study priority: ${p[3]}<br>Model: ${MODELNAME[p[4]]}${p[7] ? '<br><i>Location approximate</i>' : ''}`)));
+  const damL = L.layerGroup(DAMS.map(d => L.marker([d[5], d[6]], {icon: icon('#0f5f8c')}).bindPopup(`<b>${d[0]} Dam</b><br>${d[1]} · ${d[2]}<br>${d[4]}`)));
+  const gaugeL = L.layerGroup(GAUGES.map(g => L.marker([g[2], g[3]], {icon: icon('#10b981', 1)}).bindPopup(`<b>${usgsLink(g[0])}</b><br>${g[1]}<br>Gauge record: 10-yr ~${fmt(g[5])} cfs, 100-yr ~${fmt(g[6])} cfs${g[7] ? `<br>Ida 2021 peak: ${fmt(g[7])} cfs` : ''}${g[4] ? `<br>Flood Study: ${g[4]}` : ''}`)));
+  const hwmL = L.layerGroup(HWM.map(h => L.circleMarker([h[1], h[2]], {radius: 7, color: '#7c2d12', weight: 2, fillColor: '#fdba74', fillOpacity: 1}).bindPopup(`<b>${h[0]}</b><br>Ida mark ${h[3]} ft · model (radar) ${h[6]} ft (${(h[6] - h[3]).toFixed(1)} ft)`)));
+  const maryL = L.layerGroup(), bl = L.layerGroup(); let ov = [];
+  get('results/mary_footprint.geojson').then(g => maryL.addLayer(L.geoJSON(g, {style: {color: '#15803d', weight: 2, fillColor: '#4ade80', fillOpacity: .35, dashArray: '4 3'}}).bindPopup('<b>Mary Street wetland concept</b><br>About 40 acres lowered 1.5 ft on average. 100-yr test running.')));
+  const tog = {lProj: projL, lDam: damL, lGauge: gaugeL, lHwm: hwmL, lMary: maryL, lBld: bl};
+  Object.entries(tog).forEach(([id, l]) => { if ($(id).checked) l.addTo(map); $(id).onchange = e => e.target.checked ? l.addTo(map) : map.removeLayer(l); });
+  $('lDepth').onchange = () => draw();
+  $('storm').innerHTML = STORMS.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  $('storm').onchange = () => { draw(); drawRun(); };
+  window._zoomB = (a, b, z) => { map.setView([a, b], z || 15); if (isPhone()) window.scrollTo({top: 0, behavior: 'smooth'}); };
+  const runs = p => Object.values(R.runs).filter(r => r.plan === p).sort((a, b) => MODELORDER.indexOf(a.model) - MODELORDER.indexOf(b.model));
+  const r = (m, p) => R.runs[m + '_' + p];
+  function draw() {
+    ov.forEach(o => map.removeLayer(o)); ov = []; bl.clearLayers();
+    const p = $('storm').value, rs = runs(p);
+    $('cov').textContent = 'Covers: ' + (rs.map(x => MODELNAME[x.model]).join(', ') || 'none yet');
+    rs.forEach(x => { if ($('lDepth').checked) ov.push(L.imageOverlay('results/img/' + x.model + '_' + p + '.png', x.bounds, {opacity: .85}).addTo(map));
+      x.bpts.forEach(([a, b, d]) => L.circleMarker([a, b], {radius: d >= 2 ? 3 : 2, color: '#dc2626', weight: 0, fillOpacity: .75}).bindTooltip(`Building · ${d} ft`).addTo(bl)); });
+    const dt = rs.reduce((s, x) => s + (x.by_muni.Downingtown || 0), 0), b = rs.reduce((s, x) => s + x.bldg, 0), a = rs.reduce((s, x) => s + x.acres, 0);
+    $('bKpis').innerHTML = `<div><b>${fmt(a)}</b><span>acres under 0.5 ft+</span></div><div><b>${fmt(b)}</b><span>buildings touched</span></div><div><b>${rs.some(x => x.model === 'M02') ? fmt(dt) : '–'}</b><span>in Downingtown</span></div>`;
+    $('bKpiNote').textContent = `${$('storm').selectedOptions[0].text} · ${rs.length} of 6 models`;
+    $('tModels').innerHTML = '<tr><th>Model</th><th class="n">Acres</th><th class="n">Buildings</th><th class="n">Outlet peak (cfs)</th></tr>' +
+      MODELORDER.map(m => { const x = r(m, p), o = R.runs[m + '_p03'] || R.runs[m + '_p17'];
+        return `<tr class="click" data-m="${m}"><td>${MODELNAME[m]}</td><td class="n">${x ? fmt(x.acres) : '<span class="fine">not run</span>'}</td><td class="n">${x ? fmt(x.bldg) : ''}</td><td class="n">${x && x.peak && x.peak.Outlet ? fmt(x.peak.Outlet) : ''}</td></tr>`; }).join('');
+    document.querySelectorAll('#tModels tr[data-m]').forEach(tr => tr.onclick = () => { const x = r(tr.dataset.m, p) || R.runs[tr.dataset.m + '_p03']; if (x) { map.fitBounds(x.bounds); if (isPhone()) window.scrollTo({top: 0, behavior: 'smooth'}); } });
+  }
+  results.then(() => { draw(); tables(); drawRun(); });
+  function tables() {
+    const RFP = [
+     ['Existing flooding, 10-yr storm', st('ok', 'done'), 'Depth map, buildings, flows; 24-hour storm run upstream'],
+     ['Existing flooding, 100-yr storm', st('run', 'running'), 'Downingtown 100-yr running; upstream 100-yr within 6% of the gauge record'],
+     ['25 and 50-yr storms', st('pend', 'queued'), 'Plans built'],
+     ['Ida 2021', st('warn', 'calibrating'), 'Radar-rain run done; 3–4 ft below the marks; wet-soil test running'],
+     ['Ten capital projects, before and after', st('pend', 'ready'), 'Mary St wetland is first; others can be drawn into the terrain'],
+     ['Downstream effects of each project', st('ok', 'built in'), 'East Branch from Marsh Creek to the confluence in one model'],
+     ['Concepts, costs, ranking', '—', 'GEI; the models supply the benefits (depth removed, buildings out of the water)'],
+     ['Real-time 2D mapping (optional task, not purchased)', st('ok', 'prototype'), '<a href="../Brandywine/" target="_blank" rel="noopener">Brandywine Flood Watch ↗</a>']];
+    $('tRfp').innerHTML = '<tr><th>RFP item</th><th>Status</th><th>What the models give</th></tr>' + RFP.map(x => `<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join('');
+    const keep = Object.entries(R.downingtown).filter(([k]) => !/S Lloyd|Beaver Creek at Lancaster/.test(k));
+    $('tDt').innerHTML = '<tr><th>Location</th><th class="n">10-yr (6-hr)</th><th class="n">Ida even rain</th><th class="n">Ida radar</th></tr>' +
+      keep.map(([k, v]) => `<tr class="click" onclick="_zoomB(${v.lat},${v.lon},16)"><td>${k}</td><td class="n">${v.p03.wse}</td><td class="n">${v.p18.wse}</td><td class="n">${v.p19 ? v.p19.wse : '–'}</td></tr>`).join('');
+    $('tBld').innerHTML = '<tr><th>Storm</th><th class="n">Downingtown</th><th class="n">Caln</th><th class="n">East Brandywine</th></tr>' +
+      [['10-yr (6-hr)', 'p03'], ['Ida, even rain', 'p18'], ['Ida, radar rain', 'p19']].map(([n, p]) => { const x = r('M02', p); return x ? `<tr><td>${n}</td><td class="n">${x.by_muni.Downingtown || 0}</td><td class="n">${x.by_muni.Caln || 0}</td><td class="n">${x.by_muni['East Brandywine'] || 0}</td></tr>` : ''; }).join('');
+    $('tProj').innerHTML = '<tr><th>Project</th><th>Where</th><th>Priority</th><th>Model</th></tr>' + PROJ.map(p => `<tr class="click" onclick="_zoomB(${p[5]},${p[6]},16)"><td>${p[1]}</td><td>${p[2]}</td><td>${p[3]}</td><td>${MODELNAME[p[4]]}</td></tr>`).join('');
+    $('tGage').innerHTML = '<tr><th>Gauge</th><th>Study recommendation</th></tr>' + GAUGES.filter(g => g[4]).map(g => `<tr class="click" onclick="_zoomB(${g[2]},${g[3]},14)"><td>${g[1]}<br><span class="fine">${usgsLink(g[0])}</span></td><td>${g[4]}</td></tr>`).join('') +
+      '<tr><td>Beaver Creek at Mary Street, Downingtown</td><td>Develop a new NWS flood stage</td></tr><tr><td>Buck Run at Doe Run<br><span class="fine">' + usgsLink('01480629') + '</span></td><td>Develop a new NWS flood stage</td></tr>';
+    const dg = (d, p) => { const x = r(d[3], p); if (!x) return '–'; const k = Object.keys(x.dams).find(k => k.toLowerCase().startsWith(d[0].split(' ')[0].toLowerCase())); return k ? `${x.dams[k].pool_max} / ${fmt(x.dams[k].q_out)}` : '–'; };
+    $('tDam').innerHTML = '<tr><th>Dam</th><th class="n">10-yr 24h</th><th class="n">100-yr 24h</th><th class="n">Ida radar</th><th>Flood Study</th></tr>' +
+      DAMS.map(d => `<tr class="click" onclick="_zoomB(${d[5]},${d[6]},15)"><td>${d[0]}</td><td class="n">${dg(d, 'p14')}</td><td class="n">${dg(d, 'p17')}</td><td class="n">${dg(d, 'p19')}</td><td class="fine">${d[4]}</td></tr>`).join('');
+    $('runSel').innerHTML = MODELORDER.filter(m => m !== 'M01').map(m => `<option value="${m}">${MODELNAME[m]}</option>`).join('');
+    $('runSel').onchange = drawRun;
+  }
+}
+function drawRun() {
+  if (!R || !$('runSel').value || !$('b-run').classList.contains('on')) return;
+  const m = $('runSel').value, p = $('storm').value, x = R.runs[m + '_' + p];
+  if (chart) { chart.destroy(); chart = null; }
+  if (!x || !x.t || !x.t.length) { $('tRun').innerHTML = `<tr><td>${MODELNAME[m]} has not been run for this storm yet.</td></tr>`; return; }
+  const ds = Object.entries(x.hyd).map(([k, v]) => ({label: k.replace('_', ' '), data: v, borderColor: k === 'Outlet' ? '#0f5f8c' : '#94a3b8', borderWidth: k === 'Outlet' ? 2.4 : 1.4, pointRadius: 0, tension: .2}));
+  Object.entries(x.dams).forEach(([k, d]) => ds.push({label: k.replace(/Dam$/, '').replace(/([a-z])([A-Z])/g, '$1 $2') + ' Dam outflow', data: d.q_t, borderColor: '#16a34a', borderDash: [4, 3], borderWidth: 1.3, pointRadius: 0}));
+  chart = new Chart($('hyd'), {type: 'line', data: {labels: x.t.map(v => v.toFixed(1)), datasets: ds},
+    options: {animation: false, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
+      plugins: {legend: {labels: {boxWidth: 10, font: {size: 10}}}, tooltip: {callbacks: {label: c => `${c.dataset.label}: ${fmt(c.parsed.y)} cfs`}}},
+      scales: {x: {title: {display: true, text: 'hours', font: {size: 10}}, ticks: {maxTicksLimit: 8, font: {size: 10}}}, y: {title: {display: true, text: 'cfs', font: {size: 10}}, ticks: {font: {size: 10}}}}}});
+  $('tRun').innerHTML = `<tr><th>Boundary</th><th class="n">Peak (cfs)</th></tr>` + Object.entries(x.peak).map(([k, v]) => `<tr><td>${k.replace('_', ' ')}</td><td class="n">${fmt(v)}</td></tr>`).join('') +
+    `<tr><td class="fine" colspan="2">Run time ${x.runtime} · volume error ${x.vol_err.toFixed(3)}%</td></tr>`;
+}
+
+// =================================================================== checks
+function initChecks() {
+  results.then(() => {
+    const r = (m, p) => R.runs[m + '_' + p], q = (m, p) => r(m, p) && r(m, p).peak ? r(m, p).peak.Outlet : null;
+    const F = [
+      ['East Branch at Dowlin Forge (60 sq mi, ' + usgsLink('01480700') + ')', 5505, 11591, 'FEMA 100-yr 6,549', q('M03', 'p14'), q('M03', 'p17')],
+      ['East Branch below Downingtown (90 sq mi, ' + usgsLink('01480870') + ')', 7578, 14861, 'At the confluence (123 sq mi): 10-yr 8,417 / 100-yr 12,605', null, null],
+      ['Brandywine at Chadds Ford (287 sq mi, ' + usgsLink('01481000') + ')', 15434, 31913, '10-yr 17,137 / 100-yr 32,711', null, null]];
+    $('cFlow').innerHTML = '<tr><th>Location</th><th class="n">Gauge 10-yr</th><th class="n">Gauge 100-yr</th><th>Flood Study</th><th class="n">Model 10-yr</th><th class="n">Model 100-yr</th></tr>' +
+      F.map(f => `<tr><td>${f[0]}</td><td class="n">${fmt(f[1])}</td><td class="n">${fmt(f[2])}</td><td class="fine">${f[3]}</td><td class="n">${f[4] ? fmt(f[4]) + '<br>' + pct(f[4], f[1]) : '<span class="fine">pending</span>'}</td><td class="n">${f[5] ? fmt(f[5]) + '<br>' + pct(f[5], f[2]) : '<span class="fine">pending</span>'}</td></tr>`).join('');
+    $('cRain').innerHTML = '<tr><th>Rain gauge</th><th class="n">Gauge</th><th class="n">Radar</th><th class="n">Diff</th></tr>' + RAIN.map(x => `<tr><td>${x[0]}</td><td class="n">${x[1].toFixed(2)}</td><td class="n">${x[2].toFixed(2)}</td><td class="n">${pct(x[2], x[1])}</td></tr>`).join('');
+    $('cHwm').innerHTML = '<tr><th>Bridge (East Branch)</th><th class="n">Ida mark (ft)</th><th class="n">Model, even rain</th><th class="n">Model, radar</th><th class="n">FEMA 100-yr</th></tr>' +
+      HWM.map(h => `<tr><td>${h[0]}</td><td class="n">${h[3].toFixed(1)}</td><td class="n">${h[5].toFixed(1)} <span class="neg">(${(h[5] - h[3]).toFixed(1)})</span></td><td class="n">${h[6].toFixed(1)} <span class="neg">(${(h[6] - h[3]).toFixed(1)})</span></td><td class="n">${h[4].toFixed(1)}</td></tr>`).join('');
+    $('cIdaQ').innerHTML = '<tr><th>Ida peak flow</th><th class="n">Measured / Study</th><th class="n">Model, radar</th><th class="n">Diff</th></tr>' +
+      `<tr><td>East Branch at Dowlin Forge (${usgsLink('01480700')})</td><td class="n">16,100 measured</td><td class="n">${fmt(q('M03', 'p19'))}</td><td class="n">${pct(q('M03', 'p19'), 16100)}</td></tr>` +
+      `<tr><td>East Branch at the confluence</td><td class="n">25,000 Study estimate</td><td class="n">${fmt(q('M02', 'p19'))}</td><td class="n">${pct(q('M02', 'p19'), 25000)}</td></tr>` +
+      `<tr><td>West Branch at Modena (${usgsLink('01480617')})</td><td class="n">12,300 measured</td><td class="n fine">pending</td><td></td></tr>` +
+      `<tr><td>Brandywine at Chadds Ford (${usgsLink('01481000')})</td><td class="n">49,000 measured</td><td class="n fine">pending</td><td></td></tr>`;
+  });
+}
+route();
 </script>
 </body>
 </html>
