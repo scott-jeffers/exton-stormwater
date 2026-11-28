@@ -297,7 +297,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:#f3f7fb}
   <h3>3. Ida water levels and peak flows</h3>
   <div class="tw"><table id="cHwm"></table></div>
   <div class="tw" style="margin-top:12px"><table id="cIdaQ"></table></div>
-  <div class="warnbox">With rainfall checked, the 3–4 ft shortfall at every mark points to runoff, not rain: most likely ground already soaked by Tropical Storm Henri a week earlier. A wet-soil run of the Upper East Branch is under way, with a morning rain band (about 0.3–0.4 in) that the first run left out.</div>
+  <div class="warnbox">With rainfall checked, the 3–4 ft shortfall at every mark points to runoff, not rain: most likely ground already soaked by Tropical Storm Henri a week earlier. The wet-soil test of the Upper East Branch (soils at AMC III, plus a morning rain band of about 0.3–0.4 in that the first run left out) brought the Dowlin Forge peak to 13,984 cfs at 8:00 pm, against 16,100 cfs measured at 7:37 pm, and the Dowlin Forge Rd mark to within 0.9 ft. Wet-soil runs for the other models are under way.</div>
 </div></section>
 
 <!-- ======================= SOURCES ======================= -->
@@ -312,6 +312,12 @@ tr.click{cursor:pointer}tr.click:hover td{background:#f3f7fb}
     <li>Models are linked: each upstream model's outflow is the next one's inflow.</li>
     <li>Design storms use NOAA Atlas 14 depths with an SCS Type II pattern; Ida uses NOAA MRMS radar rainfall, hour by hour.</li>
     <li>Long runs are computed in the cloud on NEER; tests run on a local workstation.</li>
+  </ul></div>
+
+  <h3>Download the models</h3>
+  <div class="card"><ul class="src">
+    <li><a href="https://github.com/scott-jeffers/exton-stormwater/tree/main/BrandywineModels" target="_blank" rel="noopener">Brandywine HEC-RAS models on GitHub</a><div class="what">Every model's project, geometry, plan and flow files, the build and linking scripts, and a guide to running them.</div></li>
+    <li><a href="https://github.com/scott-jeffers/exton-stormwater/releases/tag/brandywine-models-v0.9" target="_blank" rel="noopener">Ready-to-run model zips (release v0.9, draft)</a><div class="what">One zip per model (0.3–0.9 GB) with terrain, land cover, soils and all plans. Opens in HEC-RAS 7.0.1.</div></li>
   </ul></div>
 
   <h3>Limits</h3>

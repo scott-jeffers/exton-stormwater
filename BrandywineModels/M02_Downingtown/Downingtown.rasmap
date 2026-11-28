@@ -1,0 +1,328 @@
+<RASMapper>
+  <Version>2.0.0</Version>
+  <RASProjectionFilename Filename=".\Terrain\Projection.prj" />
+  <Features Checked="True" Expanded="True">
+    <Layer Name="Outlet and inflow points" Type="PointFeatureLayer" Checked="True" Filename=".\GIS\Outlet_and_Inflows.shp" />
+    <Layer Name="Inflow BC lines (M03, M01)" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\BC_Lines_Inflow_M03_M01.shp" />
+    <Layer Name="Culverts and bridges (cross-checked, burned)" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\Structures_CrossChecked.shp" />
+    <Layer Name="Bridge Openings (terrain notched)" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\Bridge_Openings.shp" />
+    <Layer Name="Storm sewer pipes (inferred)" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\StormSewer_Pipes_Inferred.shp" />
+    <Layer Name="County Streams" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\County_Streams.shp" />
+    <Layer Name="M01 Exton model domain" Type="PolygonFeatureLayer" Checked="True" Filename=".\GIS\M01_Exton_Domain.shp" />
+    <Layer Name="Watershed" Type="PolygonFeatureLayer" Checked="True" Filename=".\GIS\Watershed_Downingtown.shp" />
+    <Layer Name="Profile Lines" Type="PolylineFeatureLayer" Filename=".\Features\Profile Lines.shp" />
+  </Features>
+  <Geometries Checked="True" Expanded="True">
+    <Layer Name="East Branch Brandywine - Downingtown 2D Rain-on-Grid (culverts burned)" Type="RASGeometry" Checked="True" Expanded="True" Filename=".\Downingtown.g01.hdf">
+      <Layer Type="RASXS" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
+      <Layer Type="RASD2FlowArea" Checked="True">
+        <DataColumnGroupVisibilities>
+          <DataColumnGroupVisibility DisplayName="Feature Parameters" IsVisible="False" />
+        </DataColumnGroupVisibilities>
+      </Layer>
+      <Layer Type="MeshPerimeterLayer">
+        <DataColumnGroupVisibilities>
+          <DataColumnGroupVisibility DisplayName="Feature Parameters" IsVisible="True" />
+        </DataColumnGroupVisibilities>
+      </Layer>
+      <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+      <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Bridges/Culverts" />
+      <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+      <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+      <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+      <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+      <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+      <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Inline Structures" />
+      <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+      <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+      <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+      <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+      <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+      <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="Lateral Structures" />
+      <Layer Name="Gate Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+      <Layer Name="Gate Openings" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+      <Layer Name="Culvert Groups" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="" />
+      <Layer Name="Culvert Barrels" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+      <Layer Name="Rating Curve Outlets" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+      <Layer Name="Outlet Time Series" Type="VirtualGeometryFeatureLayer" ParentIdentifiers="SA/2D Connections" />
+      <Layer Type="StructureLayer" UnitsRiverStation="Feet" RiverStationDecimalPlaces="0" />
+      <Layer Type="RASPipeNodes">
+        <SymbologyByAttributeColumns Checked="True" SelectedColumn="Node Type">
+          <ValueToSymbology Value="Start">
+            <Symbology>
+              <PointSymbol Type="1" Size="8" pA="255" pR="255" pG="255" pB="255" bA="255" bR="0" bG="128" bB="0" />
+              <HillShade On="True" Azimuth="315" Zenith="45" ZFactor="3" />
+              <Contour On="False" Interval="5" Color="-16777216" />
+              <Pen B="0" G="128" R="0" A="255" Dash="0" Width="2" />
+              <SurfaceFill Colors="-1,-16777216" Values="0,100" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
+              <Brush Type="SolidBrush" B="0" G="128" R="0" A="50" Name="PolygonFill" />
+            </Symbology>
+          </ValueToSymbology>
+          <ValueToSymbology Value="Junction">
+            <Symbology>
+              <PointSymbol Type="1" Size="8" pA="255" pR="255" pG="255" pB="255" bA="255" bR="128" bG="0" bB="0" />
+              <HillShade On="True" Azimuth="315" Zenith="45" ZFactor="3" />
+              <Contour On="False" Interval="5" Color="-16777216" />
+              <Pen B="0" G="0" R="128" A="255" Dash="0" Width="2" />
+              <SurfaceFill Colors="-1,-16777216" Values="0,100" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
+              <Brush Type="SolidBrush" B="0" G="0" R="128" A="50" Name="PolygonFill" />
+            </Symbology>
+          </ValueToSymbology>
+          <ValueToSymbology Value="Culvert Opening">
+            <Symbology>
+              <PointSymbol Type="1" Size="8" pA="255" pR="128" pG="128" pB="128" bA="255" bR="128" bG="128" bB="128" />
+              <HillShade On="True" Azimuth="315" Zenith="45" ZFactor="3" />
+              <Contour On="False" Interval="5" Color="-16777216" />
+              <Pen B="128" G="128" R="128" A="255" Dash="0" Width="2" />
+              <SurfaceFill Colors="-1,-16777216" Values="0,100" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
+              <Brush Type="SolidBrush" B="128" G="128" R="128" A="50" Name="PolygonFill" />
+            </Symbology>
+          </ValueToSymbology>
+          <ValueToSymbology Value="External">
+            <Symbology>
+              <PointSymbol Type="1" Size="8" pA="255" pR="255" pG="255" pB="0" bA="255" bR="255" bG="255" bB="0" />
+              <HillShade On="True" Azimuth="315" Zenith="45" ZFactor="3" />
+              <Contour On="False" Interval="5" Color="-16777216" />
+              <Pen B="0" G="255" R="255" A="255" Dash="0" Width="2" />
+              <SurfaceFill Colors="-1,-16777216" Values="0,100" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
+              <Brush Type="SolidBrush" B="0" G="255" R="255" A="50" Name="PolygonFill" />
+            </Symbology>
+          </ValueToSymbology>
+          <ValueToSymbology Value="Closed">
+            <Symbology>
+              <PointSymbol Type="1" Size="8" pA="255" pR="255" pG="255" pB="255" bA="255" bR="0" bG="0" bB="255" />
+              <HillShade On="True" Azimuth="315" Zenith="45" ZFactor="3" />
+              <Contour On="False" Interval="5" Color="-16777216" />
+              <Pen B="255" G="0" R="0" A="255" Dash="0" Width="2" />
+              <SurfaceFill Colors="-1,-16777216" Values="0,100" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
+              <Brush Type="SolidBrush" B="255" G="0" R="0" A="50" Name="PolygonFill" />
+            </Symbology>
+          </ValueToSymbology>
+          <ValueToSymbology Value="Error">
+            <Symbology>
+              <PointSymbol Type="1" Size="8" pA="255" pR="255" pG="0" pB="0" bA="255" bR="255" bG="0" bB="0" />
+              <HillShade On="True" Azimuth="315" Zenith="45" ZFactor="3" />
+              <Contour On="False" Interval="5" Color="-16777216" />
+              <Pen B="0" G="0" R="255" A="255" Dash="0" Width="2" />
+              <SurfaceFill Colors="-1,-16777216" Values="0,100" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
+              <Brush Type="SolidBrush" B="0" G="0" R="255" A="50" Name="PolygonFill" />
+            </Symbology>
+          </ValueToSymbology>
+        </SymbologyByAttributeColumns>
+      </Layer>
+      <Layer Type="RASPipeLinks">
+        <SymbologyByAttributeColumns Checked="True" SelectedColumn="Modeling Approach">
+          <ValueToSymbology Value="Hydraulic">
+            <Symbology>
+              <PointSymbol Type="1" Size="7" pA="255" pR="147" pG="112" pB="219" bA="255" bR="147" bG="112" bB="219" />
+              <HillShade On="True" Azimuth="315" Zenith="45" ZFactor="3" />
+              <Contour On="False" Interval="5" Color="-16777216" />
+              <Pen B="219" G="112" R="147" A="255" Dash="0" Width="2" />
+              <SurfaceFill Colors="-1,-16777216" Values="0,100" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
+              <Brush Type="SolidBrush" B="219" G="112" R="147" A="50" Name="PolygonFill" />
+            </Symbology>
+          </ValueToSymbology>
+          <ValueToSymbology Value="Instantaneous">
+            <Symbology>
+              <PointSymbol Type="1" Size="7" pA="255" pR="147" pG="112" pB="219" bA="255" bR="147" bG="112" bB="219" />
+              <HillShade On="True" Azimuth="315" Zenith="45" ZFactor="3" />
+              <Contour On="False" Interval="5" Color="-16777216" />
+              <Pen B="219" G="112" R="147" A="255" Dash="2" Width="2" />
+              <SurfaceFill Colors="-1,-16777216" Values="0,100" Stretched="True" AlphaTag="255" UseDatasetMinMax="False" RegenerateForScreen="False" />
+              <Brush Type="SolidBrush" B="219" G="112" R="147" A="50" Name="PolygonFill" />
+            </Symbology>
+          </ValueToSymbology>
+        </SymbologyByAttributeColumns>
+      </Layer>
+      <Layer Type="FinalNValueLayer">
+        <ResampleMethod>near</ResampleMethod>
+        <Surface On="True" />
+      </Layer>
+      <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Downingtown.g01.hdf">
+        <ResampleMethod>near</ResampleMethod>
+        <Surface On="True" />
+      </Layer>
+      <Layer Name="Final Values" Type="InterpretationRasterizerLayer" Filename=".\Downingtown.g01.hdf">
+        <ResampleMethod>near</ResampleMethod>
+        <Surface On="True" />
+      </Layer>
+    </Layer>
+  </Geometries>
+  <Plans>
+    <Layer Name="2yr 6hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p01" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p01" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p01" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p01" />
+    </Layer>
+    <Layer Name="5yr 6hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p02" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p02" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p02" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p02" />
+    </Layer>
+    <Layer Name="10yr 6hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p03" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p03" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p03" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p03" />
+    </Layer>
+    <Layer Name="25yr 6hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p04" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p04" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p04" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p04" />
+    </Layer>
+    <Layer Name="100yr 6hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p05" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p05" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p05" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p05" />
+    </Layer>
+    <Layer Name="2yr 24hr Type II Rain-on-Grid WARMUP 0-3h" Type="RASPlan" Filename=".\Downingtown.p06" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p06" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p06" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p06" />
+    </Layer>
+    <Layer Name="5yr 24hr Type II Rain-on-Grid WARMUP 0-3h" Type="RASPlan" Filename=".\Downingtown.p07" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p07" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p07" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p07" />
+    </Layer>
+    <Layer Name="10yr 24hr Type II Rain-on-Grid WARMUP 0-3h" Type="RASPlan" Filename=".\Downingtown.p08" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p08" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p08" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p08" />
+    </Layer>
+    <Layer Name="25yr 24hr Type II Rain-on-Grid WARMUP 0-3h" Type="RASPlan" Filename=".\Downingtown.p09" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p09" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p09" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p09" />
+    </Layer>
+    <Layer Name="50yr 24hr Type II Rain-on-Grid WARMUP 0-3h" Type="RASPlan" Filename=".\Downingtown.p10" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p10" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p10" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p10" />
+    </Layer>
+    <Layer Name="100yr 24hr Type II Rain-on-Grid WARMUP 0-3h" Type="RASPlan" Filename=".\Downingtown.p11" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p11" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p11" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p11" />
+    </Layer>
+    <Layer Name="2yr 24hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p12" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p12" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p12" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p12" />
+    </Layer>
+    <Layer Name="5yr 24hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p13" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p13" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p13" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p13" />
+    </Layer>
+    <Layer Name="10yr 24hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p14" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p14" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p14" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p14" />
+    </Layer>
+    <Layer Name="25yr 24hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p15" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p15" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p15" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p15" />
+    </Layer>
+    <Layer Name="50yr 24hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p16" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p16" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p16" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p16" />
+    </Layer>
+    <Layer Name="100yr 24hr Type II Rain-on-Grid" Type="RASPlan" Filename=".\Downingtown.p17" GeometryHDF=".\Downingtown.g01.hdf">
+      <Layer Name="Encroachments" Type="RASEncroachments" Filename=".\Downingtown.p17" />
+      <Layer Name="Zones" Type="RASEncroachmentZones" Filename=".\Downingtown.p17" />
+      <Layer Name="Regions" Type="RASEncroachmentPolygons" Filename=".\Downingtown.p17" />
+    </Layer>
+  </Plans>
+  <EventConditions>
+    <Layer Name="2yr 6hr SCS Type II (Atlas14 2.32in)" Type="RASEventConditions" Filename=".\Downingtown.u01.hdf" />
+    <Layer Name="5yr 6hr SCS Type II (Atlas14 2.88in)" Type="RASEventConditions" Filename=".\Downingtown.u02.hdf" />
+    <Layer Name="10yr 6hr SCS Type II (Atlas14 3.34in)" Type="RASEventConditions" Filename=".\Downingtown.u03.hdf" />
+    <Layer Name="25yr 6hr SCS Type II (Atlas14 3.96in)" Type="RASEventConditions" Filename=".\Downingtown.u04.hdf" />
+    <Layer Name="100yr 6hr SCS Type II (Atlas14 5.00in)" Type="RASEventConditions" Filename=".\Downingtown.u05.hdf" />
+    <Layer Name="2yr 24hr SCS Type II (Atlas14 3.25in) [warm-up 0-3h]" Type="RASEventConditions" Filename=".\Downingtown.u06.hdf" />
+    <Layer Name="5yr 24hr SCS Type II (Atlas14 4.08in) [warm-up 0-3h]" Type="RASEventConditions" Filename=".\Downingtown.u07.hdf" />
+    <Layer Name="10yr 24hr SCS Type II (Atlas14 4.76in) [warm-up 0-3h]" Type="RASEventConditions" Filename=".\Downingtown.u08.hdf" />
+    <Layer Name="25yr 24hr SCS Type II (Atlas14 5.75in) [warm-up 0-3h]" Type="RASEventConditions" Filename=".\Downingtown.u09.hdf" />
+    <Layer Name="50yr 24hr SCS Type II (Atlas14 6.58in) [warm-up 0-3h]" Type="RASEventConditions" Filename=".\Downingtown.u10.hdf" />
+    <Layer Name="100yr 24hr SCS Type II (Atlas14 7.47in) [warm-up 0-3h]" Type="RASEventConditions" Filename=".\Downingtown.u11.hdf" />
+    <Layer Name="2yr 24hr SCS Type II (Atlas14 3.25in)" Type="RASEventConditions" Filename=".\Downingtown.u12.hdf" />
+    <Layer Name="5yr 24hr SCS Type II (Atlas14 4.08in)" Type="RASEventConditions" Filename=".\Downingtown.u13.hdf" />
+    <Layer Name="10yr 24hr SCS Type II (Atlas14 4.76in)" Type="RASEventConditions" Filename=".\Downingtown.u14.hdf" />
+    <Layer Name="25yr 24hr SCS Type II (Atlas14 5.75in)" Type="RASEventConditions" Filename=".\Downingtown.u15.hdf" />
+    <Layer Name="50yr 24hr SCS Type II (Atlas14 6.58in)" Type="RASEventConditions" Filename=".\Downingtown.u16.hdf" />
+    <Layer Name="100yr 24hr SCS Type II (Atlas14 7.47in)" Type="RASEventConditions" Filename=".\Downingtown.u17.hdf" />
+  </EventConditions>
+  <Results />
+  <MapLayers Expanded="True">
+    <Layer Name="LandCover" Type="LandCoverLayer" Expanded="True" Filename=".\Land Classification\LandCover.hdf" SelectedParameterForSurfaceFillLabel="ManningsN">
+      <Symbology>
+        <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      </Symbology>
+      <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      <Layer Name="Classification Polygons" Type="LandCoverClassificationLayer" />
+    </Layer>
+    <Layer Name="Hydrologic Soil Groups" Type="LandCoverLayer" Expanded="True" Filename=".\Soils\Hydrologic Soil Groups.hdf" SelectedParameterForSurfaceFillLabel="ID">
+      <Symbology>
+        <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      </Symbology>
+      <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      <Layer Name="Classification Polygons" Type="LandCoverClassificationLayer" />
+    </Layer>
+    <Layer Name="Infiltration" Type="LandCoverLayer" Checked="True" Filename=".\Soils\Infiltration.hdf" SelectedParameterForSurfaceFillLabel="ID">
+      <Symbology>
+        <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      </Symbology>
+      <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      <Layer Name="Classification Polygons" Type="LandCoverClassificationLayer" />
+    </Layer>
+  </MapLayers>
+  <Terrains Checked="True" Expanded="True">
+    <Layer Name="Terrain" Type="TerrainLayer" Checked="True" Filename=".\Terrain\Terrain.hdf">
+      <ResampleMethod>near</ResampleMethod>
+      <Surface On="True" />
+    </Layer>
+  </Terrains>
+  <CurrentView>
+    <MaxX>2575369.92082665</MaxX>
+    <MinX>2509540</MinX>
+    <MaxY>272180</MaxY>
+    <MinY>220854.643338548</MinY>
+  </CurrentView>
+  <VelocitySettings>
+    <Density>1.5</Density>
+    <Lifetime>100</Lifetime>
+    <Radius>0.75</Radius>
+    <Method>2</Method>
+    <Timestep>1</Timestep>
+    <StaticColor>Black</StaticColor>
+    <SpeedRelativeToZoom>False</SpeedRelativeToZoom>
+  </VelocitySettings>
+  <AnimationSettings>
+    <DelayTimer>0</DelayTimer>
+  </AnimationSettings>
+  <Units>US Customary</Units>
+  <RenderMode>slopingPretty</RenderMode>
+  <FullExtentPlotting />
+  <MarksWarpMethod>False</MarksWarpMethod>
+  <CurrentSettings>
+    <ProjectSettings>
+      <RiverStationUnits>Feet</RiverStationUnits>
+      <RiverStationDecimalPlaces>0</RiverStationDecimalPlaces>
+      <HorizontalDecimalPlaces>1</HorizontalDecimalPlaces>
+      <VerticalDecimalPlaces>2</VerticalDecimalPlaces>
+      <XSMaxPoints>450</XSMaxPoints>
+      <LSMaxPoints>1000</LSMaxPoints>
+      <ProfilePointMinCount>0</ProfilePointMinCount>
+      <ShowLegend>True</ShowLegend>
+      <ShowNorthArrow>False</ShowNorthArrow>
+      <ShowScaleBar>True</ShowScaleBar>
+      <ShowGreaterThanInLegend>False</ShowGreaterThanInLegend>
+    </ProjectSettings>
+    <Folders>
+      <TerrainDestinationFolder>.\Terrain</TerrainDestinationFolder>
+      <TerrainSourceFolder>.\Terrain</TerrainSourceFolder>
+    </Folders>
+  </CurrentSettings>
+</RASMapper>

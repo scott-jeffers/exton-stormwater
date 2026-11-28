@@ -1,0 +1,165 @@
+Flow Title=25yr 6hr SCS Type II (Atlas14 3.96in)
+Program Version=7.01
+Use Restart= 0 
+Boundary Location=                ,                ,        ,        ,                ,Downingtown     ,                ,Outlet                          ,                                ,                                
+Friction Slope=0.0008
+Boundary Location=                ,                ,        ,        ,                ,Downingtown     ,                ,M03_Inflow                      ,                                ,                                
+Interval=5MIN
+Flow Hydrograph= 145 
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0
+Stage Hydrograph TW Check=0
+Flow Hydrograph Slope= 0.001 
+DSS Path=
+Use DSS=False
+Use Fixed Start Time=False
+Fixed Start Date/Time=,
+Is Critical Boundary=False
+Critical Boundary Flow=
+Boundary Location=                ,                ,        ,        ,                ,Downingtown     ,                ,M01_Inflow                      ,                                ,                                
+Interval=5MIN
+Flow Hydrograph= 145 
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.1
+     0.1     0.1     0.2     0.2     0.3     0.3     0.4     0.5     0.5     0.6
+     0.7     0.8     0.9     1.1     1.2     1.2     1.0     1.2     1.4     1.7
+     1.9     2.5     3.8     5.2    13.6    30.4    46.3    46.1    54.5   104.0
+   227.2   335.5   397.8   436.9   465.1   492.5   543.6   727.6  1174.0  1727.5
+  2151.8  2295.4  2277.5  2193.8  2085.9  1982.5  1872.3  1771.4  1676.9  1592.1
+  1516.0  1449.4  1388.2  1328.6  1271.7  1218.8  1173.0  1136.0  1113.9  1121.1
+  1180.0  1314.3  1523.2  1772.0  2014.1  2229.3  2392.3  2516.5  2612.6  2684.1
+  2736.1  2771.7  2793.9  2804.8  2805.9  2798.5  2783.6  2762.7  2737.5  2709.0
+  2677.7  2643.9  2606.7  2566.7  2523.4  2477.0  2428.5  2377.7  2326.8  2275.1
+  2224.3  2173.9  2124.0  2074.7  2025.7  1978.6  1930.5  1882.4  1835.2  1789.7
+  1741.9  1696.0  1650.7  1604.8  1560.6  1517.7  1475.8  1435.2  1398.2  1359.7
+  1322.1  1286.1  1250.8  1217.1  1184.3  1151.7  1120.1  1089.1  1058.8  1029.1
+   999.8   972.0   944.7   918.5   892.0   865.3   839.3   814.5   790.6   768.3
+   746.3   725.6   706.1   686.7   667.1
+Stage Hydrograph TW Check=0
+Flow Hydrograph Slope= 0.001 
+DSS Path=
+Use DSS=False
+Use Fixed Start Time=False
+Fixed Start Date/Time=,
+Is Critical Boundary=False
+Critical Boundary Flow=
+Boundary Location=                ,                ,        ,        ,                ,Downingtown     ,                ,                                ,                                ,                                
+Interval=5MIN
+Precipitation Hydrograph= 73 
+  0.0000  0.0150  0.0150  0.0150  0.0150  0.0150  0.0150  0.0169  0.0169  0.0169
+  0.0169  0.0169  0.0169  0.0216  0.0216  0.0216  0.0216  0.0216  0.0216  0.0291
+  0.0291  0.0291  0.0291  0.0291  0.0291  0.0451  0.0451  0.0451  0.0451  0.0451
+  0.0451  0.1389  0.1389  0.1389  0.5746  0.5746  0.5746  0.0676  0.0676  0.0676
+  0.0676  0.0676  0.0676  0.0347  0.0347  0.0347  0.0347  0.0347  0.0347  0.0253
+  0.0253  0.0253  0.0253  0.0253  0.0253  0.0197  0.0197  0.0197  0.0197  0.0197
+  0.0197  0.0141  0.0141  0.0141  0.0141  0.0141  0.0141  0.0141  0.0141  0.0141
+  0.0141  0.0141  0.0141
+DSS Path=
+Use DSS=False
+Use Fixed Start Time=False
+Fixed Start Date/Time=,
+Is Critical Boundary=False
+Critical Boundary Flow=
+Met Point Raster Parameters=,,,,
+Precipitation Mode=Disable
+Wind Mode=No Wind Forces
+Air Density Mode=Specified
+Wave Mode=No Wave Forcing
+Met BC=Precipitation|Mode=Constant
+Met BC=Precipitation|Expanded View=-1
+Met BC=Precipitation|Constant Value=1
+Met BC=Precipitation|Constant Units=in/hr
+Met BC=Precipitation|Point Interpolation=
+Met BC=Precipitation|Gridded Source=DSS
+Met BC=Precipitation|Gridded Interpolation=
+Met BC=Evapotranspiration|Mode=None
+Met BC=Evapotranspiration|Expanded View=0
+Met BC=Evapotranspiration|Constant Units=mm/hr
+Met BC=Evapotranspiration|Point Interpolation=Nearest
+Met BC=Evapotranspiration|Gridded Source=DSS
+Met BC=Evapotranspiration|Gridded Interpolation=
+Met BC=Wind Speed|Expanded View=0
+Met BC=Wind Speed|Point Interpolation=Nearest
+Met BC=Wind Speed|Gridded Source=DSS
+Met BC=Wind Speed|Gridded Interpolation=
+Met BC=Wind Direction|Expanded View=0
+Met BC=Wind Direction|Point Interpolation=Nearest
+Met BC=Wind Direction|Gridded Source=DSS
+Met BC=Wind Direction|Gridded Interpolation=
+Met BC=Wind Velocity X|Expanded View=0
+Met BC=Wind Velocity X|Point Interpolation=Nearest
+Met BC=Wind Velocity X|Gridded Source=DSS
+Met BC=Wind Velocity X|Gridded Interpolation=
+Met BC=Wind Velocity Y|Expanded View=0
+Met BC=Wind Velocity Y|Point Interpolation=Nearest
+Met BC=Wind Velocity Y|Gridded Source=DSS
+Met BC=Wind Velocity Y|Gridded Interpolation=
+Met BC=Wave Forcing X|Expanded View=0
+Met BC=Wave Forcing X|Point Interpolation=Nearest
+Met BC=Wave Forcing X|Gridded Source=DSS
+Met BC=Wave Forcing X|Gridded Interpolation=
+Met BC=Wave Forcing Y|Expanded View=0
+Met BC=Wave Forcing Y|Point Interpolation=Nearest
+Met BC=Wave Forcing Y|Gridded Source=DSS
+Met BC=Wave Forcing Y|Gridded Interpolation=
+Met BC=Air Density|Mode=Constant
+Met BC=Air Density|Expanded View=0
+Met BC=Air Density|Constant Value=1.225
+Met BC=Air Density|Constant Units=kg/m3
+Met BC=Air Density|Point Interpolation=Nearest
+Met BC=Air Density|Gridded Source=DSS
+Met BC=Air Density|Gridded Interpolation=
+Met BC=Air Temperature|Expanded View=0
+Met BC=Air Temperature|Point Interpolation=Nearest
+Met BC=Air Temperature|Gridded Source=DSS
+Met BC=Air Temperature|Gridded Interpolation=
+Met BC=Humidity|Expanded View=0
+Met BC=Humidity|Point Interpolation=Nearest
+Met BC=Humidity|Gridded Source=DSS
+Met BC=Humidity|Gridded Interpolation=
+Met BC=Air Pressure|Mode=Constant
+Met BC=Air Pressure|Expanded View=0
+Met BC=Air Pressure|Constant Value=1013.2
+Met BC=Air Pressure|Constant Units=mb
+Met BC=Air Pressure|Point Interpolation=
+Met BC=Air Pressure|Gridded Source=DSS
+Met BC=Air Pressure|Gridded Interpolation=
+Non-Newtonian Method= 0 ,         
+Non-Newtonian Constant Vol Conc=0
+Non-Newtonian Yield Method= 0 ,         
+Non-Newtonian Yield Coef=0, 0
+User Yeild=   0
+Non-Newtonian Sed Visc= 0 ,         
+Non-Newtonian Obrian B=0
+User Viscosity=0
+User Viscosity Ratio=0
+Herschel-Bulkley Coef=0, 0
+Clastic Method= 0 ,         
+Coulomb Phi=0
+Voellmy X=0
+Non-Newtonian Hindered FV= 0 
+Non-Newtonian FV K=0
+Non-Newtonian ds=0
+Non-Newtonian Max Cv=0
+Non-Newtonian Bulking Method= 0 , 
+Non-Newtonian High C Transport= 0 , 
+Lava Activation= 0 
+Temperature=1300,15,,15,14,980
+Heat Ballance=1,1200,0.5,1,70,0.95
+Viscosity=1000,,,
+Yield Strength=,,,
+Consistency Factor=,,,
+Profile Coefficient=4,1.3,
+Lava Param=,2500,

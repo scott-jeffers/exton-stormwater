@@ -1,0 +1,42 @@
+<RASMapper>
+  <Version>2.0.0</Version>
+  <RASProjectionFilename Filename=".\Terrain\Projection.prj" />
+  <Features Checked="True" Expanded="True">
+    <Layer Name="Outlet and USGS gauge" Type="PointFeatureLayer" Checked="True" Filename=".\GIS\Outlet_and_Gauge.shp" />
+    <Layer Name="Culverts and bridges (cross-checked, burned)" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\Structures_CrossChecked.shp" />
+    <Layer Name="Bridge Openings (terrain notched)" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\Bridge_Openings.shp" />
+    <Layer Name="Storm sewer pipes (inferred)" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\StormSewer_Pipes_Inferred.shp" />
+    <Layer Name="County Streams" Type="PolylineFeatureLayer" Checked="True" Filename=".\GIS\County_Streams.shp" />
+    <Layer Name="Watershed" Type="PolygonFeatureLayer" Checked="True" Filename=".\GIS\Watershed_BrandywineMain.shp" />
+  </Features>
+  <MapLayers Expanded="True">
+    <Layer Name="LandCover" Type="LandCoverLayer" Expanded="True" Filename=".\Land Classification\LandCover.hdf" SelectedParameterForSurfaceFillLabel="ManningsN">
+      <Symbology>
+        <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      </Symbology>
+      <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      <Layer Name="Classification Polygons" Type="LandCoverClassificationLayer" />
+    </Layer>
+    <Layer Name="Hydrologic Soil Groups" Type="LandCoverLayer" Expanded="True" Filename=".\Soils\Hydrologic Soil Groups.hdf" SelectedParameterForSurfaceFillLabel="ID">
+      <Symbology>
+        <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      </Symbology>
+      <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      <Layer Name="Classification Polygons" Type="LandCoverClassificationLayer" />
+    </Layer>
+    <Layer Name="Infiltration" Type="LandCoverLayer" Checked="True" Filename=".\Soils\Infiltration.hdf" SelectedParameterForSurfaceFillLabel="ID">
+      <Symbology>
+        <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      </Symbology>
+      <ColorByteMap Type="System.Int32" Alpha="128" Values="" Colors="" ValuesExcludeLegend="" />
+      <Layer Name="Classification Polygons" Type="LandCoverClassificationLayer" />
+    </Layer>
+  </MapLayers>
+  <Units>US Customary</Units>
+  <CurrentSettings>
+    <Folders>
+      <TerrainDestinationFolder>.\Terrain</TerrainDestinationFolder>
+      <TerrainSourceFolder>.\Terrain</TerrainSourceFolder>
+    </Folders>
+  </CurrentSettings>
+</RASMapper>

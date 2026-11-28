@@ -1,0 +1,209 @@
+Flow Title=Ida 2021 MRMS radar (gridded)
+Program Version=7.01
+Use Restart= 0 
+Boundary Location=                ,                ,        ,        ,                ,Downingtown     ,                ,Outlet                          ,                                ,                                
+Friction Slope=0.0008
+Boundary Location=                ,                ,        ,        ,                ,Downingtown     ,                ,M03_Inflow                      ,                                ,                                
+Interval=5MIN
+Flow Hydrograph= 433 
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.1     0.1     0.1     0.2
+     0.2     0.3     0.3     0.3     0.4     0.8     1.2     1.6     2.1     2.5
+     2.9     3.6     4.3     6.0     7.6     9.7    11.9    15.6    19.3    23.2
+    27.1    31.9    36.7    57.5    78.3   123.2   168.1   317.7   467.4   592.9
+   718.4   785.8   853.3   898.5   943.8  1001.6  1059.4  1204.9  1350.3  1634.1
+  1917.8  2187.5  2457.2  2691.6  2926.0  3099.4  3272.8  3417.8  3562.9  3710.5
+  3858.0  4038.9  4219.8  4490.1  4760.5  5109.2  5457.9  5817.3  6176.7  6490.1
+  6803.4  7062.8  7322.1  7532.6  7743.1  7889.7  8036.2  8124.3  8212.5  8235.4
+  8258.3  8215.6  8173.0  8075.8  7978.6  7845.5  7712.5  7556.3  7400.1  7234.8
+  7069.5  6907.1  6744.7  6588.4  6432.1  6287.7  6143.3  6030.1  5916.9  5834.6
+  5752.2  5668.6  5584.9  5493.1  5401.3  5307.7  5214.1  5125.6  5037.1  4959.6
+  4882.2  4812.9  4743.6  4676.1  4608.6  4539.0  4469.3  4397.9  4326.5  4256.3
+  4186.1  4115.4  4044.8  3974.5  3904.2  3834.0  3763.9  3694.6  3625.3  3556.2
+  3487.0  3417.1  3347.2  3278.7  3210.3  3146.8  3083.4  3024.8  2966.2  2912.4
+  2858.7  2809.7  2760.8  2715.5  2670.2  2627.1  2584.0  2543.9  2503.7  2466.5
+  2429.3  2394.1  2358.8  2325.8  2292.7  2264.7  2236.6  2209.6  2182.6  2157.5
+  2132.4  2108.7  2085.0  2062.1  2039.2  2017.5  1995.8  1975.4  1955.1  1935.3
+  1915.5  1896.8  1878.1  1858.9  1839.7  1821.3  1802.8  1785.4  1768.0  1751.9
+  1735.8  1720.0  1704.1  1688.5  1672.9  1658.0  1643.0  1628.8  1614.7  1601.4
+  1588.2  1575.6  1563.1  1550.3  1537.5  1524.8  1512.1  1499.7  1487.4  1476.1
+  1464.7  1454.0  1443.2  1432.2  1421.2  1411.2  1401.1  1391.3  1381.5  1372.3
+  1363.0  1354.1  1345.2  1336.5  1327.8  1319.3  1310.8  1302.5  1294.1  1286.4
+  1278.6  1270.5  1262.3  1254.3  1246.4  1238.6  1230.8  1223.1  1215.4  1207.9
+  1200.4  1193.0  1185.6  1178.2  1170.8  1163.5  1156.2  1148.5  1140.9  1133.2
+  1125.5  1118.1  1110.7  1102.6  1094.5  1086.5  1078.4  1070.3  1062.1  1053.8
+  1045.5  1036.9  1028.4  1018.7  1009.1   995.9   982.8   951.4   920.1   878.0
+   836.0   808.6   781.3   769.3   757.3   752.9   748.4   746.2   743.9   742.2
+   740.4   738.8   737.2   735.6   734.1   732.6   731.0   729.5   728.1   726.6
+   725.1   723.5   721.9   720.4   718.9   717.4   715.9   714.3   712.8   711.5
+   710.2   708.7   707.1   705.6   704.0   702.5   700.9   699.6   698.3   696.8
+   695.4   694.1   692.8   691.3   689.9   688.4   686.9   685.5   684.1   682.7
+   681.3   679.9   678.6   677.3   676.0   674.6   673.3   672.2   671.1   670.4
+   669.7   667.9   666.0   664.4   662.8   661.4   660.0   658.7   657.4   656.2
+   654.9   653.6   652.4   651.1   649.9   648.8   647.6   646.5   645.4   644.4
+   643.3   642.2   641.1   640.1   639.0   637.9   636.8   635.7   634.6   633.6
+   632.5   631.5   630.4   629.4   628.3   627.4   626.5   625.3   624.2   623.2
+   622.1   621.1   620.1
+Stage Hydrograph TW Check=0
+Flow Hydrograph Slope= 0.001 
+DSS Path=
+Use DSS=False
+Use Fixed Start Time=False
+Fixed Start Date/Time=,
+Is Critical Boundary=False
+Critical Boundary Flow=
+Boundary Location=                ,                ,        ,        ,                ,Downingtown     ,                ,M01_Inflow                      ,                                ,                                
+Interval=5MIN
+Flow Hydrograph= 433 
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0
+     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0     0.1
+     0.1     0.1     0.2     0.3     0.5     0.5     0.6     0.7     0.9     1.0
+     1.1     1.4     1.6     1.8     1.4     1.6     1.8     2.2     2.5     3.0
+     3.5     4.0     4.3     5.6     8.4    11.9    32.0    68.1   112.6   158.7
+   396.7   663.4   816.5   960.4  1139.5  1295.3  1512.9  2246.6  4076.2  5277.1
+  5630.3  5557.7  5308.3  5006.2  4707.1  4428.8  4171.8  3930.8  3706.4  3500.3
+  3313.4  3141.0  2988.6  2874.4  2781.7  2780.8  2907.1  3231.9  3716.6  4240.2
+  4715.4  5120.3  5453.5  5720.1  5927.4  6077.2  6183.9  6254.5  6293.9  6306.0
+  6294.1  6263.3  6217.4  6156.1  6080.5  5993.8  5898.5  5796.8  5690.8  5580.9
+  5468.4  5354.8  5241.6  5130.8  5022.7  4916.2  4808.4  4698.4  4587.0  4474.3
+  4361.6  4250.5  4140.1  4031.5  3925.0  3821.1  3720.6  3622.3  3525.8  3431.5
+  3338.6  3247.2  3159.2  3073.1  2988.9  2907.2  2829.9  2753.7  2678.1  2604.1
+  2535.2  2463.0  2394.5  2327.2  2259.6  2195.1  2132.4  2071.4  2014.3  1958.5
+  1902.5  1848.3  1796.1  1745.9  1698.0  1650.0  1604.1  1558.7  1514.4  1471.2
+  1428.8  1388.7  1348.8  1311.0  1273.6  1235.2  1197.3  1163.0  1129.6  1097.2
+  1065.7  1035.1  1005.5   976.6   948.6   921.3   894.9   869.2   844.3   820.1
+   796.5   773.7   751.5   729.9   709.0   688.7   668.8   649.7   631.0   613.0
+   595.3   578.2   561.7   545.5   529.9   514.7   499.9   485.5   471.6   458.1
+   444.9   432.2   419.7   407.8   396.0   384.6   373.7   363.0   352.5   342.3
+   332.5   323.1   313.7   304.7   296.1   287.5   279.3   271.2   263.5   255.9
+   248.5   241.5   234.5   227.8   221.3   214.9   208.7   202.7   196.9   191.3
+   185.8   180.5   175.2   170.2   165.4   160.6   156.0   151.5   147.2   143.0
+   138.9   134.9   131.0   127.2   123.6   120.0   116.6   113.2   110.0   106.8
+   103.7   100.8    97.9    95.1    92.3    89.7    87.1    84.7    82.2    79.9
+    77.5    75.4    73.2    71.1    69.1    67.0    65.1    63.3    61.4    59.7
+    58.0    56.3    54.7    53.1    51.6    50.2    48.7    47.3    45.9    44.6
+    43.3    42.1    40.9    39.7    38.5    37.5    36.4    35.3    34.3    33.3
+    32.4    31.5    30.6    29.6    28.8    28.0    27.2    26.4    25.6    25.0
+    24.2    23.5    22.8    22.2    21.5    21.0    20.3    19.7    19.2    18.6
+    18.1    17.6    17.1    16.5    16.1    15.6    15.2    14.7    14.4    13.9
+    13.6    13.1    12.8    12.4    12.1    11.7    11.4    11.1    10.7    10.4
+    10.1     9.8     9.6     9.2     9.0     8.8     8.4     8.2     8.0     7.8
+     7.5     7.3     7.2     7.0     6.7     6.5     6.4     6.2     5.9     5.8
+     5.7     5.5     5.4     5.1     5.0     4.9     4.8     4.6     4.4     4.3
+     4.2     4.1     4.0     3.9     3.8     3.6     3.5     3.4     3.3     3.2
+     3.2     3.1     3.0     2.8     2.8     2.7     2.6     2.6     2.5     2.4
+     2.4     2.3     2.3
+Stage Hydrograph TW Check=0
+Flow Hydrograph Slope= 0.001 
+DSS Path=
+Use DSS=False
+Use Fixed Start Time=False
+Fixed Start Date/Time=,
+Is Critical Boundary=False
+Critical Boundary Flow=
+Met Point Raster Parameters=,,,,
+Precipitation Mode=Enable
+Wind Mode=No Wind Forces
+Air Density Mode=Specified
+Wave Mode=No Wave Forcing
+Met BC=Precipitation|Mode=Gridded
+Met BC=Precipitation|Expanded View=-1
+Met BC=Precipitation|Ratio=1
+Met BC=Precipitation|Constant Value=1
+Met BC=Precipitation|Constant Units=in/hr
+Met BC=Precipitation|Point Interpolation=
+Met BC=Precipitation|Gridded Source=GDAL Raster File(s)
+Met BC=Precipitation|Gridded Interpolation=Bilinear
+Met BC=Precipitation|Gridded GDAL Filename=.\Precipitation\_ras_commander_cache\precip-0cd22387ac06937c.nc
+Met BC=Precipitation|Gridded GDAL Group=precipitation
+Met BC=Evapotranspiration|Mode=None
+Met BC=Evapotranspiration|Expanded View=0
+Met BC=Evapotranspiration|Constant Units=mm/hr
+Met BC=Evapotranspiration|Point Interpolation=Nearest
+Met BC=Evapotranspiration|Gridded Source=DSS
+Met BC=Evapotranspiration|Gridded Interpolation=
+Met BC=Wind Speed|Expanded View=0
+Met BC=Wind Speed|Point Interpolation=Nearest
+Met BC=Wind Speed|Gridded Source=DSS
+Met BC=Wind Speed|Gridded Interpolation=
+Met BC=Wind Direction|Expanded View=0
+Met BC=Wind Direction|Point Interpolation=Nearest
+Met BC=Wind Direction|Gridded Source=DSS
+Met BC=Wind Direction|Gridded Interpolation=
+Met BC=Wind Velocity X|Expanded View=0
+Met BC=Wind Velocity X|Point Interpolation=Nearest
+Met BC=Wind Velocity X|Gridded Source=DSS
+Met BC=Wind Velocity X|Gridded Interpolation=
+Met BC=Wind Velocity Y|Expanded View=0
+Met BC=Wind Velocity Y|Point Interpolation=Nearest
+Met BC=Wind Velocity Y|Gridded Source=DSS
+Met BC=Wind Velocity Y|Gridded Interpolation=
+Met BC=Wave Forcing X|Expanded View=0
+Met BC=Wave Forcing X|Point Interpolation=Nearest
+Met BC=Wave Forcing X|Gridded Source=DSS
+Met BC=Wave Forcing X|Gridded Interpolation=
+Met BC=Wave Forcing Y|Expanded View=0
+Met BC=Wave Forcing Y|Point Interpolation=Nearest
+Met BC=Wave Forcing Y|Gridded Source=DSS
+Met BC=Wave Forcing Y|Gridded Interpolation=
+Met BC=Air Density|Mode=Constant
+Met BC=Air Density|Expanded View=0
+Met BC=Air Density|Constant Value=1.225
+Met BC=Air Density|Constant Units=kg/m3
+Met BC=Air Density|Point Interpolation=Nearest
+Met BC=Air Density|Gridded Source=DSS
+Met BC=Air Density|Gridded Interpolation=
+Met BC=Air Temperature|Expanded View=0
+Met BC=Air Temperature|Point Interpolation=Nearest
+Met BC=Air Temperature|Gridded Source=DSS
+Met BC=Air Temperature|Gridded Interpolation=
+Met BC=Humidity|Expanded View=0
+Met BC=Humidity|Point Interpolation=Nearest
+Met BC=Humidity|Gridded Source=DSS
+Met BC=Humidity|Gridded Interpolation=
+Met BC=Air Pressure|Mode=Constant
+Met BC=Air Pressure|Expanded View=0
+Met BC=Air Pressure|Constant Value=1013.2
+Met BC=Air Pressure|Constant Units=mb
+Met BC=Air Pressure|Point Interpolation=
+Met BC=Air Pressure|Gridded Source=DSS
+Met BC=Air Pressure|Gridded Interpolation=
+Non-Newtonian Method= 0 ,         
+Non-Newtonian Constant Vol Conc=0
+Non-Newtonian Yield Method= 0 ,         
+Non-Newtonian Yield Coef=0, 0
+User Yeild=   0
+Non-Newtonian Sed Visc= 0 ,         
+Non-Newtonian Obrian B=0
+User Viscosity=0
+User Viscosity Ratio=0
+Herschel-Bulkley Coef=0, 0
+Clastic Method= 0 ,         
+Coulomb Phi=0
+Voellmy X=0
+Non-Newtonian Hindered FV= 0 
+Non-Newtonian FV K=0
+Non-Newtonian ds=0
+Non-Newtonian Max Cv=0
+Non-Newtonian Bulking Method= 0 , 
+Non-Newtonian High C Transport= 0 , 
+Lava Activation= 0 
+Temperature=1300,15,,15,14,980
+Heat Ballance=1,1200,0.5,1,70,0.95
+Viscosity=1000,,,
+Yield Strength=,,,
+Consistency Factor=,,,
+Profile Coefficient=4,1.3,
+Lava Param=,2500,
