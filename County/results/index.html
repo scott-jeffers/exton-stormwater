@@ -17,7 +17,7 @@ header h1{font-size:18px;margin:0;font-weight:650}
 header .sub{font-size:12px;opacity:.75}
 header a{color:#cfe0ff;font-size:12px}
 .storm{display:flex;gap:4px;margin-left:auto}
-.storm button{font:600 13px system-ui;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:16px;padding:5px 14px;cursor:pointer}
+.storm button{font:600 12px system-ui;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:16px;padding:5px 14px;cursor:pointer}
 .storm button.on{background:#fff;color:var(--ink)}
 .kpis{display:flex;gap:8px;flex-wrap:wrap}
 .kpi{background:rgba(255,255,255,.08);border-radius:8px;padding:4px 12px;text-align:center;min-width:100px}
@@ -46,6 +46,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .legend{background:#fff;padding:8px 10px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.2);font-size:12px;line-height:1.6}
 .legend i{display:inline-block;width:14px;height:11px;margin-right:6px;vertical-align:-1px}
 .chartbox{position:relative;height:190px}
+#t24{font-size:11.5px}#t24 td,#t24 th{padding:4px 3px}
 .note{font-size:12px;background:#fff8eb;border:1px solid #f6dfb5;border-radius:8px;padding:7px 9px;margin:8px 0}
 ul.tight{margin:4px 0;padding-left:18px}ul.tight li{margin:2px 0}
 @media (max-width:860px){main{grid-template-columns:1fr;grid-template-rows:45% 55%}aside{order:2}}
@@ -54,7 +55,7 @@ ul.tight{margin:4px 0;padding-left:18px}ul.tight li{margin:2px 0}
 <body>
 <header>
   <div><h1>Brandywine 2D Model Results</h1><div class="sub">HEC-RAS 2D rain-on-grid · max flood depth, flows, dams, and checks against the 2025 Brandywine Flood Study · <a href="../">← County program</a></div></div>
-  <div class="storm" id="storm"><button data-p="p03" class="on">10-yr storm</button><button data-p="p18">Ida 2021</button></div>
+  <div class="storm" id="storm"><button data-p="p03" class="on">10-yr 6-hr</button><button data-p="p14">10-yr 24-hr</button><button data-p="p17">100-yr 24-hr</button><button data-p="p18">Ida (even rain)</button><button data-p="p19">Ida (radar)</button></div>
   <div class="kpis" id="kpis"></div>
 </header>
 <main>
@@ -77,6 +78,9 @@ ul.tight{margin:4px 0;padding-left:18px}ul.tight li{margin:2px 0}
     <h2>Peak flow vs Flood Study reference flows</h2>
     <table id="tflow"></table>
     <div class="note">Model 10-yr peaks run about 20–30% under (main stem: 12,895 vs 17,137 cfs, −25%) the Flood Study's 10-yr flows. That is expected for now: the Study's flows are USGS frequency flows, which match a <b>24-hour</b> design storm, and these runs used a <b>6-hour</b> storm. The 24-hour runs (plans p12–p17 are already built) are the like-for-like check.</div>
+    <h2>24-hour design storms vs Flood Study (like-for-like)</h2>
+    <table id="t24"></table>
+    <div class="note">First 24-hour results. Buck/Doe Run's 10-yr is within about 20% of the Study (the Study's figure adds two tributaries). Upper East Branch's 100-yr is 67% above the FEMA 100-yr at Dowlin Forge. That gap is too large to accept: the next check is the soil/infiltration settings and whether the 24-hr SCS Type II pattern is too peaky for these watersheds.</div>
     <h2>Ida high-water marks, East Branch (Downingtown)</h2>
     <table id="thwm"></table>
     <div class="note">The modeled Ida water surface is <b>3.5–4.3 ft below</b> every surveyed mark, and lands almost exactly on the FEMA 100-yr elevation. A consistent offset like this points at the rain input, not the hydraulics: this run spread a uniform 6-hour total over each model, and Ida's heaviest bands (7.0 in at Modena, 6.2 in at Chester Springs) fell in about 3 hours. Radar rainfall (MRMS) is the fix. West Branch and main-stem marks get checked once Coatesville Ida and the main-stem runs finish.</div>
@@ -143,6 +147,7 @@ const DAMOBS={MarshCreekDam:'Observed in Ida: pool about 365.5 ft (+6 ft over no
  WhartonDam:'Small dam on a Marsh Creek tributary.'};
 const NICE={BarnestonDam:'Barneston Dam',MarshCreekDam:'Marsh Creek Dam',WhartonDam:'Wharton Dam',BeaverCreekDam:'Beaver Creek Dam',HiberniaDam:'Hibernia Dam (Chambers Lake)'};
 const ORDER=['M03','M12','M02','M04','M05'];
+const STATUS={M02_p19:'Running on NEER',M02_p17:'Running on NEER (with Mary St wetland version)',M02_p14:'Waiting for credits',M12_p17:'Running on NEER',M04_p19:'Ready; waiting for credits',M04_p17:'Ready; waiting for credits',M04_p14:'Ready; waiting for credits',M05_p19:'After Downingtown + Coatesville',M05_p17:'After Downingtown + Coatesville',M05_p14:'After Downingtown + Coatesville',M04_p18:'Superseded by the radar run',M05_p18:'Superseded by the radar run'};
 const COL={M03:'#0f766e',M12:'#7c3aed',M02:'#2563eb',M04:'#b45309',M05:'#be123c'};
 const fmt=n=>n==null?'–':Math.round(n).toLocaleString();
 const pct=(a,b)=>{if(a==null||!b)return'';const d=(a-b)/b*100;const c=Math.abs(d)<=15?'d-pos':Math.abs(d)<=35?'d-mid':'d-neg';return `<span class="${c}">${d>0?'+':''}${d.toFixed(0)}%</span>`};
@@ -171,10 +176,10 @@ function draw(){
     ov[m]=L.imageOverlay('img/'+m+'_'+plan+'.png',r.bounds,{opacity:.85,interactive:false}).addTo(map);
     r.bpts.forEach(([la,lo,d])=>L.circleMarker([la,lo],{radius:d>=2?3.2:2.2,color:'#dc2626',weight:0,fillOpacity:.75}).bindTooltip(`Building · ${d} ft`).addTo(bl));});
   document.getElementById('kpis').innerHTML=`<div class="kpi"><b>${n}/5</b><span>models done</span></div><div class="kpi"><b>${fmt(ac)}</b><span>acres flooded ≥0.5 ft</span></div><div class="kpi"><b>${fmt(bd)}</b><span>buildings touched</span></div>`;
-  document.getElementById('stormlbl').textContent='· '+(plan==='p03'?'10-yr':'Ida');
+  document.getElementById('stormlbl').textContent='· '+document.querySelector('#storm button.on').textContent;
   document.getElementById('mlist').innerHTML=ORDER.map(m=>{const r=run(m),r0=run(m,'p03')||run(m,'p18');
     const name=r0?r0.name:{M05:'Brandywine Main Stem'}[m];
-    if(!r)return `<div class="model"><span class="pill" style="background:${COL[m]}">${m}</span><div><div class="n">${name||m}</div><div class="m">${m==='M04'&&plan==='p18'?'Ida run in progress on the office PC':m==='M05'?'Ida runs after Coatesville Ida finishes':'Not run yet'}</div></div></div>`;
+    if(!r)return `<div class="model"><span class="pill" style="background:${COL[m]}">${m}</span><div><div class="n">${name||m}</div><div class="m">${STATUS[m+'_'+plan]||'Not run yet'}</div></div></div>`;
     return `<div class="model ${sel===m?'sel':''}" onclick="pick('${m}')"><span class="pill" style="background:${COL[m]}">${m}</span><div><div class="n">${r.name}</div><div class="m">${fmt(r.acres)} ac · ${fmt(r.bldg)} buildings · max ${r.max_depth} ft</div></div><div class="r"><b>${fmt(r.peak.Outlet)}</b> cfs<br><span class="small">outlet peak</span></div></div>`}).join('');
   if(sel)pick(sel,false);
 }
@@ -194,8 +199,9 @@ function pick(m,zoom=true){
 function tables(){
   const rows=ORDER.map(m=>{const r=run(m,'p03'),b=BFS[m];return `<tr><td><b>${m}</b> ${b.loc}</td><td class="n">${r?fmt(r.peak.Outlet):'running'}</td><td class="n">${fmt(b.q10)}</td><td class="n">${r?pct(r.peak.Outlet,b.q10):''}</td><td class="n">${fmt(b.q100)}</td></tr>`}).join('');
   document.getElementById('tflow').innerHTML=`<tr><th>Model outlet / Study location</th><th class="n">Model 10-yr</th><th class="n">Study Q10</th><th class="n">Diff</th><th class="n">Study Q100</th></tr>`+rows;
+  document.getElementById('t24').innerHTML=`<tr><th>Model outlet</th><th class="n">10-yr 24h</th><th class="n">Study Q10</th><th class="n">Diff</th><th class="n">100-yr 24h</th><th class="n">Study Q100</th><th class="n">Diff</th></tr>`+ORDER.map(m=>{const a=run(m,'p14'),c=run(m,'p17'),b=BFS[m];return `<tr><td><b>${m}</b></td><td class="n">${a?fmt(a.peak.Outlet):'–'}</td><td class="n">${fmt(b.q10)}</td><td class="n">${a?pct(a.peak.Outlet,b.q10):''}</td><td class="n">${c?fmt(c.peak.Outlet):'–'}</td><td class="n">${fmt(b.q100)}</td><td class="n">${c?pct(c.peak.Outlet,b.q100):''}</td></tr>`}).join('');
   document.getElementById('thwm').innerHTML=`<tr><th>Bridge</th><th class="n">Ida mark</th><th class="n">Model Ida</th><th class="n">Diff</th><th class="n">FEMA 100</th><th class="n">FEMA 500</th></tr>`+HWM.map(h=>`<tr><td>${h[0]}</td><td class="n">${h[1].toFixed(1)}</td><td class="n">${h[4].toFixed(1)}</td><td class="n d-neg">${(h[4]-h[1]).toFixed(1)}</td><td class="n">${h[2].toFixed(1)}</td><td class="n">${h[3].toFixed(1)}</td></tr>`).join('');
-  document.getElementById('tida').innerHTML=`<tr><th>Location</th><th class="n">Model Ida</th><th class="n">Study estimate</th><th class="n">Diff</th></tr>`+ORDER.map(m=>{const r=run(m,'p18'),b=BFS[m];return `<tr><td><b>${m}</b> ${b.loc}</td><td class="n">${r?fmt(r.peak.Outlet):'running'}</td><td class="n">${b.ida?fmt(b.ida)+' <span class="small">'+b.idaSrc+'</span>':'–'}</td><td class="n">${r&&b.ida?pct(r.peak.Outlet,b.ida):''}</td></tr>`}).join('');
+  document.getElementById('tida').innerHTML=`<tr><th>Location</th><th class="n">Even rain</th><th class="n">Radar</th><th class="n">Study estimate</th><th class="n">Diff (radar)</th></tr>`+ORDER.map(m=>{const r0=run(m,'p18'),r=run(m,'p19'),b=BFS[m];return `<tr><td><b>${m}</b> ${b.loc}</td><td class="n">${r0?fmt(r0.peak.Outlet):'–'}</td><td class="n">${r?fmt(r.peak.Outlet):'–'}</td><td class="n">${b.ida?fmt(b.ida)+' <span class="small">'+b.idaSrc+'</span>':'–'}</td><td class="n">${r&&b.ida?pct(r.peak.Outlet,b.ida):''}</td></tr>`}).join('');
   // dams
   let h='';ORDER.forEach(m=>{const a=run(m,'p03'),b=run(m,'p18');const ks=Object.keys((a||b||{dams:{}}).dams);ks.forEach(k=>{
     const da=a&&a.dams[k],db=b&&b.dams[k];
