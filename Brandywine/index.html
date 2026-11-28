@@ -57,7 +57,7 @@
     </section>
 
     <section class="card">
-      <h2>Flood map <span class="help" data-tip="Flood depths come from five linked HEC-RAS 2D rain-on-grid models of the Brandywine above Chadds Ford (rain falling on the ground, culverts, bridges and flood-control dams). 'Match' picks the modeled design storm closest to the NWS rain forecast.">?</span></h2>
+      <h2>Flood map <span class="help" data-tip="Flood depths come from six linked HEC-RAS 2D rain-on-grid models of the Brandywine above Chadds Ford, including Valley Creek in Exton (rain falling on the ground, culverts, bridges and flood-control dams). 'Match' picks the modeled design storm closest to the NWS rain forecast.">?</span></h2>
       <label class="row"><input type="checkbox" id="autoMatch" checked> Match the NWS rain forecast automatically</label>
       <div id="riverPick" style="display:none"><div class="fine" style="margin-top:6px">Past storm (replay)</div>
       <select id="scenarioSel"></select></div>
@@ -96,7 +96,7 @@
 
     <section class="card about">
       <h2>About this map</h2>
-      <p>Built from five linked HEC-RAS 7 rain-on-grid models covering 271 sq mi of the Brandywine above Chadds Ford: 1-meter USGS lidar, county land cover and soils, 1,339 road crossings and five flood-control dams (Barneston, Marsh Creek, Wharton, Beaver Creek, Hibernia). Upstream outflows feed the downstream models.</p><p><b>Coverage:</b> the 10-year 6-hr storm covers all five models. The 24-hr design storms cover the upper watershed for now (Upper East Branch, Buck/Doe Run), and the Ida replay adds Downingtown. Coatesville and the main stem are being added. Areas a scenario does not cover show no flooding, which does not mean they stay dry.</p>
+      <p>Built from six linked HEC-RAS 7 rain-on-grid models covering 292 sq mi of the Brandywine above Chadds Ford, including the Valley Creek model from the West Whiteland dashboard (Exton, with its storm sewers): 1-meter USGS lidar, county land cover and soils, 1,538 road crossings and five flood-control dams (Barneston, Marsh Creek, Wharton, Beaver Creek, Hibernia). Upstream outflows feed the downstream models.</p><p><b>Coverage:</b> the 10-year 6-hr storm covers all five models. The 24-hr design storms cover the upper watershed and Valley Creek for now (Upper East Branch, Buck/Doe Run, Valley Creek), and the Ida replay covers the upper watershed plus Downingtown (Valley Creek has no Ida run yet). Coatesville and the main stem are being added. Areas a scenario does not cover show no flooding, which does not mean they stay dry.</p>
       <p><b>Limits:</b> storm sewers are not modeled, and many culvert sizes and dam outlets were estimated, not surveyed. Calibration against USGS gauges is under way: the 100-year matches the Dowlin Forge gauge record within about 6%, but smaller storms and Ida run low. Flood maps show likely problem areas. They do not predict exact depths. Always confirm conditions in the field.</p>
       <p class="fine">Live data: NWS (api.weather.gov, WPC QPF), NOAA MRMS and NEXRAD via Iowa Environmental Mesonet, USGS Water Data, NOAA NWPS, FEMA NFHL.</p>
     </section>

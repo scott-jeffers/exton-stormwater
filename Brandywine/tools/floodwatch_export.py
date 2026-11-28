@@ -17,12 +17,17 @@ STRUCT = {'M03': 'ebb/m03', 'M02': 'ebb/m02v2' if os.path.exists('/home/claude/e
           'M12': 'wb/m12', 'M04': 'wb/m04', 'M05': 'bm/m05'}
 CRS = 'EPSG:2272'; R = 30.0
 have = [m for m in MODELS if os.path.exists(f'out/{m}_{plan}_depth_ft.tif')]
+have0 = list(have)
 if not have: sys.exit('no models for ' + plan)
 # ---- merged depth grid (max of models) at 30 ft
 bb = [1e12, 1e12, -1e12, -1e12]
 for m in have:
     with rasterio.open(f'out/{m}_{plan}_depth_ft.tif') as r:
         b = r.bounds; bb = [min(bb[0], b.left), min(bb[1], b.bottom), max(bb[2], b.right), max(bb[3], b.top)]
+if plan in ('p03', 'p14', 'p17'):   # make room for the Valley Creek model
+    from pyproj import Transformer
+    tv = Transformer.from_crs(4326, 2272, always_xy=True); a_ = tv.transform(-75.684, 39.967); b_ = tv.transform(-75.578, 40.057)
+    bb = [min(bb[0], a_[0]), min(bb[1], a_[1]), max(bb[2], b_[0]), max(bb[3], b_[1])]
 W = int((bb[2] - bb[0]) / R) + 1; H = int((bb[3] - bb[1]) / R) + 1; tr = from_origin(bb[0], bb[3], R, R)
 D = np.full((H, W), np.nan, 'float32')
 for m in have:
@@ -30,6 +35,22 @@ for m in have:
         t = np.full((H, W), np.nan, 'float32')
         reproject(rasterio.band(r, 1), t, dst_transform=tr, dst_crs=CRS, resampling=Resampling.max, src_nodata=np.nan, dst_nodata=np.nan)
     D = np.fmax(D, t)
+# ---- Valley Creek (Exton/West Whiteland) model from the West Whiteland dashboard, same design storms
+VC = {'p03': '10yr-6-hr', 'p14': '10yr-24-hr', 'p17': '100yr-24-hr'}.get(plan)
+vcs = None
+if VC and os.path.exists(f'/home/claude/exton-stormwater/Dashboard/data/scenarios/{VC}.js'):
+    t = open(f'/home/claude/exton-stormwater/Dashboard/data/scenarios/{VC}.js').read(); vcs = json.loads(t[t.index('=', t.index(']')) + 1:].rstrip().rstrip(';'))
+    v = np.array(Image.open(io.BytesIO(base64.b64decode(vcs['value_png'].split(',')[1]))).convert('L')).astype('float32')
+    v = np.where(v == 255, np.nan, v * vcs['value_scale'])
+    (s_, w_), (n_, e_) = vcs['bounds']; from pyproj import Transformer
+    tm = Transformer.from_crs(4326, 3857, always_xy=True); x0, y0 = tm.transform(w_, s_); x1, y1 = tm.transform(e_, n_)
+    vtr = rasterio.transform.from_bounds(x0, y0, x1, y1, v.shape[1], v.shape[0])
+    t2 = np.full((H, W), np.nan, 'float32')
+    reproject(v, t2, src_transform=vtr, src_crs='EPSG:3857', dst_transform=tr, dst_crs=CRS, resampling=Resampling.average, src_nodata=np.nan, dst_nodata=np.nan)
+    t2[t2 < 0.5] = np.nan
+    from scipy import ndimage
+    lab, nl = ndimage.label(np.isfinite(t2)); sz = ndimage.sum(np.ones_like(lab), lab, range(1, nl + 1)); sm = np.zeros(nl + 1, bool); sm[1:] = sz < 18; t2[sm[lab]] = np.nan
+    D = np.fmax(D, t2); have = have + ['M01']
 # ---- display images (web mercator, ~60 ft)
 dt, dw, dh = calculate_default_transform(CRS, 'EPSG:3857', W, H, *bb, resolution=18.3)
 d3 = np.full((dh, dw), np.nan, 'float32')
@@ -90,7 +111,7 @@ for _, r in roads.iterrows():
         else: i += 1
 # ---- crossings: max WSE of low wet cells within 120 ft vs road crest
 out_x = []
-for m in have:
+for m in have0:
     z = np.load(f'cells/{m}_{plan}.npz'); xy, wse, zm = z['xy'], z['wse'], z['zmin']; t = cKDTree(xy)
     s = gpd.read_file(f'/home/claude/{STRUCT[m]}/structures_final.gpkg').to_crs(CRS)
     for _, r in s.iterrows():
@@ -105,12 +126,18 @@ for m in have:
            'wse': round(w, 2), 'crest': round(float(r.crest), 2), 'overtop_ft': round(w - float(r.crest), 2)}})
 # ---- buildings (depth alongside the footprint, from bldg.py)
 out_b = []
-for m in have:
+for m in have0:
     f = f'out/{m}_{plan}_bldg.geojson'
     if not os.path.exists(f): continue
     b = gpd.read_file(f); c = b.geometry.representative_point()
     for p, d, mu in zip(c, b.d, b.iloc[:, 1]):
         out_b.append({'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [round(p.x, 6), round(p.y, 6)]}, 'properties': {'upi': str(mu), 'max_ft': round(float(d), 2)}})
+if vcs:
+    for f in vcs['roads']['features']:
+        if f['properties']['max_ft'] >= 1.0: out_roads.append(f)
+    for f in vcs['crossings']['features']: f['properties']['id'] = 'M01-' + str(f['properties']['id']); out_x.append(f)
+    for f in vcs['buildings']['features']:
+        if f['properties']['max_ft'] >= 1.5: out_b.append(f)
 # ---- vector extent for SARTopo
 cls = np.zeros(D.shape, 'uint8'); dd = np.nan_to_num(D, nan=0); cls[dd >= 1] = 1; cls[dd >= 3] = 2
 ext = []
@@ -122,6 +149,8 @@ for geom, v in rshapes(cls, mask=cls > 0, transform=tr):
     m4 = mapping(to4326(g))
     def r6(c): return [round(c[0], 5), round(c[1], 5)] if isinstance(c[0], (int, float)) else [r6(x) for x in c]
     ext.append({'type': 'Feature', 'geometry': {'type': m4['type'], 'coordinates': r6(m4['coordinates'])}, 'properties': {'depth_class': '1-3 ft' if v == 1 else '3+ ft'}})
+out_roads = [f for f in out_roads if f['properties']['max_ft'] >= 1.0]   # the dashboard's lowest road threshold
+out_b = [f for f in out_b if f['properties']['max_ft'] >= 1.5]            # and lowest building threshold
 stats = {'flooded_acres_0p5ft': round(float(np.nansum(D >= 0.5) * R * R / 43560), 1), 'max_depth_ft': round(float(np.nanmax(D)), 1),
          'roads_flooded': len(out_roads), 'road_names': sorted({x['properties']['name'] for x in out_roads}),
          'crossings_overtopped': sum(1 for x in out_x if x['properties']['overtop_ft'] > 0), 'buildings_wet': len(out_b), 'run_complete': True}

@@ -97,7 +97,7 @@ window.SCENARIO_INDEX=[
 },
 {
 "id": "10yr-24-hr",
-"name": "10-year, 24-hr storm \u2014 upper watershed only",
+"name": "10-year, 24-hr storm \u2014 upper watershed + Valley Creek",
 "rp": 10,
 "duration": "24-hr",
 "duration_hr": 24,
@@ -133,7 +133,7 @@ window.SCENARIO_INDEX=[
 },
 {
 "id": "100yr-24-hr",
-"name": "100-year, 24-hr storm \u2014 upper watershed only",
+"name": "100-year, 24-hr storm \u2014 upper watershed + Valley Creek",
 "rp": 100,
 "duration": "24-hr",
 "duration_hr": 24,

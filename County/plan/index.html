@@ -65,7 +65,7 @@ tr.click{cursor:pointer}tr.click:hover{background:#f3f7fb}
 
   <section class="pane on" id="p-sum">
     <h2>Where things stand</h2>
-    <p class="lead">Five linked 2D models now cover 271 sq mi of the Brandywine from the headwaters to Chadds Ford, with the five flood-control dams in place. They can test any Downingtown or Flood Study project as a before-and-after run.</p>
+    <p class="lead">Six linked 2D models now cover 292 sq mi of the Brandywine from the headwaters to Chadds Ford, with the five flood-control dams in place. Valley Creek in Exton comes from the West Whiteland model, which also includes storm sewers. They can test any Downingtown or Flood Study project as a before-and-after run.</p>
     <div class="kpis" id="kpis"></div>
     <h3>Three findings so far</h3>
     <ol>
@@ -128,7 +128,7 @@ tr.click{cursor:pointer}tr.click:hover{background:#f3f7fb}
       <li>These are screening-level model results, not regulatory flood maps.</li>
       <li>Rain falls on every model cell (rain-on-grid) on 1-meter lidar terrain; storm sewers are not modeled, so street ponding is overstated.</li>
       <li>Some culvert sizes and three dam outlets (Hibernia, Marsh Creek, Wharton) are assumed. As-built data from CCWRA and DCNR would remove the biggest unknowns.</li>
-      <li>Only the 10-year (6-hr storm) covers all five models today. Other storms cover the models listed under the storm picker; areas outside them show no flooding, which does not mean they stay dry.</li>
+      <li>Valley Creek (Exton) comes from the West Whiteland model, with storm sewers; its buildings are counted the same way as the other models. It has no Ida run yet.</li><li>Only the 10-year (6-hr storm) covers all six models today. Other storms cover the models listed under the storm picker; areas outside them show no flooding, which does not mean they stay dry.</li>
       <li>Building counts are footprints touched by water, not first-floor elevations.</li>
     </ul>
     <p class="fine">Models: HEC-RAS 7.0.1, five linked 2D rain-on-grid models (Upper East Branch &amp; Marsh Creek, Buck &amp; Doe Run, Downingtown, Coatesville, main stem). Sources: 2025 Brandywine Flood Study; Borough of Downingtown RFP (May 2026); USGS NWIS peak flows; NOAA MRMS radar rainfall; Chester County GIS.</p>
@@ -157,7 +157,7 @@ const STORMS=[
  {id:'p17',name:'100-year, 24-hr storm'},
  {id:'p14',name:'10-year, 24-hr storm'},
  {id:'p03',name:'10-year, 6-hr storm'}];
-const MODELNAME={M03:'Upper East Branch',M12:'Buck/Doe Run',M02:'Downingtown',M04:'Coatesville',M05:'Main stem'};
+const MODELNAME={M01:'Valley Creek (Exton)',M03:'Upper East Branch',M12:'Buck/Doe Run',M02:'Downingtown',M04:'Coatesville',M05:'Main stem'};
 const PROJ=[ // 2025 Flood Study priority projects in PA (approx = location estimated)
  ['Main stem','East Penn Railroad bridge replacement','Chadds Ford/Pennsbury','High','M05',39.8706,-75.5941,1],
  ['Main stem','US Rte 1 bridge replacement','Chadds Ford/Pennsbury','High','M05',39.8716,-75.5933,1],
@@ -226,7 +226,7 @@ function draw(){
 function kpis(){
   const p=document.getElementById('storm').value, rs=runs(p);
   const dt=rs.reduce((s,r)=>s+(r.by_muni.Downingtown||0),0), b=rs.reduce((s,r)=>s+r.bldg,0), a=rs.reduce((s,r)=>s+r.acres,0);
-  document.getElementById('kpis').innerHTML=`<div class="kpi"><b>${fmt(a)}</b><span>acres under 0.5 ft+ of water</span></div><div class="kpi"><b>${fmt(b)}</b><span>buildings touched</span></div><div class="kpi"><b>${rs.some(r=>r.model==='M02')?fmt(dt):'–'}</b><span>of them in Downingtown Borough</span></div><div class="fine" style="grid-column:1/-1">${document.getElementById('storm').selectedOptions[0].text} · covers ${rs.length} of 5 models</div>`;
+  document.getElementById('kpis').innerHTML=`<div class="kpi"><b>${fmt(a)}</b><span>acres under 0.5 ft+ of water</span></div><div class="kpi"><b>${fmt(b)}</b><span>buildings touched</span></div><div class="kpi"><b>${rs.some(r=>r.model==='M02')?fmt(dt):'–'}</b><span>of them in Downingtown Borough</span></div><div class="fine" style="grid-column:1/-1">${document.getElementById('storm').selectedOptions[0].text} · covers ${rs.length} of 6 models</div>`;
 }
 function zoom(a,b,z){map.setView([a,b],z||15)}
 function tables(){
