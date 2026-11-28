@@ -160,8 +160,8 @@ function floodImageURL(sc, vals, mask) {   // mask: grid whose wet pixels hide t
   const c = document.createElement('canvas'); c.width = vals.w; c.height = vals.h;
   const x = c.getContext('2d'), img = x.createImageData(c.width, c.height), d = vals.d, o = img.data, thr = TH().depth;
   for (let i = 0; i < d.length; i += 4) {
-    const v = d[i]; if (v === 255) continue; const ft = v * sc.value_scale; if (ft < thr) continue;
-    if (mask && mask.d[i] !== 255 && mask.d[i] * sc.value_scale >= thr) continue;
+    const v = d[i]; if (v >= 250) continue; const ft = v * sc.value_scale; if (ft < thr) continue;
+    if (mask && mask.d[i] < 250 && mask.d[i] * sc.value_scale >= thr) continue;
     let col = null; for (const [b, cc] of FLOOD_BINS) if (ft >= b) col = cc;
     if (col) { o[i]=col[0]; o[i+1]=col[1]; o[i+2]=col[2]; o[i+3]=col[3]; }
   }
@@ -183,12 +183,15 @@ function drawScenario() {
   updateKPIs(); renderList(); renderLegend();
 }
 function decodeVals(sc) {
-  return new Promise(res => { const im = new Image(); im.onload = () => { const c=document.createElement('canvas'); c.width=im.width; c.height=im.height; const x=c.getContext('2d'); x.drawImage(im,0,0); res({w:im.width,h:im.height,d:x.getImageData(0,0,im.width,im.height).data}); }; im.onerror = ()=>res(null); im.src = sc.value_png; });
+  // read raw pixel values: no colour management (Safari/iOS otherwise shifts 255 'no water' to 254 = 25 ft)
+  const read = (src) => { const c=document.createElement('canvas'); c.width=src.width; c.height=src.height; const x=c.getContext('2d', {colorSpace:'srgb', willReadFrequently:true}); x.imageSmoothingEnabled=false; x.drawImage(src,0,0); return {w:src.width,h:src.height,d:x.getImageData(0,0,src.width,src.height).data}; };
+  return fetch(sc.value_png).then(r=>r.blob()).then(b=>createImageBitmap(b, {colorSpaceConversion:'none', premultiplyAlpha:'none'})).then(read)
+    .catch(() => new Promise(res => { const im = new Image(); im.onload = () => res(read(im)); im.onerror = ()=>res(null); im.src = sc.value_png; }));
 }
 function maxVals(a, b) {             // per-pixel max depth of two grids on the same raster
   if (!a || !b || a.w !== b.w || a.h !== b.h) return a || b;
   const d = new Uint8ClampedArray(a.d.length);
-  for (let i = 0; i < d.length; i += 4) { const u = a.d[i], v = b.d[i]; d[i] = u === 255 ? v : v === 255 ? u : Math.max(u, v); }
+  for (let i = 0; i < d.length; i += 4) { const u = a.d[i], v = b.d[i]; d[i] = u >= 250 ? v : v >= 250 ? u : Math.max(u, v); }
   return {w:a.w, h:a.h, d};
 }
 function mergeScen(r, l) {
@@ -221,7 +224,7 @@ function valsAt(v, sc, latlng) {
   const b = sc.bounds, p = L.CRS.EPSG3857.project(latlng), sw = L.CRS.EPSG3857.project(L.latLng(b[0])), ne = L.CRS.EPSG3857.project(L.latLng(b[1]));
   const fx = (p.x - sw.x) / (ne.x - sw.x), fy = (ne.y - p.y) / (ne.y - sw.y);
   if (fx<0||fx>=1||fy<0||fy>=1) return null;
-  const x = v.d[(Math.floor(fy*v.h)*v.w + Math.floor(fx*v.w))*4]; return x === 255 ? 0 : x * sc.value_scale;
+  const x = v.d[(Math.floor(fy*v.h)*v.w + Math.floor(fx*v.w))*4]; return x >= 250 ? 0 : x * sc.value_scale;
 }
 function depthAt(latlng) {
   if (!floodVals || !scen) return null;
@@ -229,7 +232,7 @@ function depthAt(latlng) {
   const fx = (p.x - sw.x) / (ne.x - sw.x), fy = (ne.y - p.y) / (ne.y - sw.y);
   if (fx<0||fx>=1||fy<0||fy>=1) return null;
   const i = (Math.floor(fy*floodVals.h)*floodVals.w + Math.floor(fx*floodVals.w))*4, v = floodVals.d[i];
-  return v === 255 ? 0 : v * scen.value_scale;
+  return v >= 250 ? 0 : v * scen.value_scale;
 }
 map.on('click', (e) => {
   if (!scen || !map.hasLayer(floodLayer)) return;
@@ -518,7 +521,7 @@ function updateKPIs() {
   $('kRoads').textContent = new Set(roads.map(f=>f.properties.name)).size;
   $('kX').textContent = scen.crossings.features.filter(f=>xingOK(f.properties)).length;
   $('kB').textContent = scen.buildings.features.filter(f=>bldgOK(f.properties)).length;
-  { let n = 0; if (floodVals) { const d = floodVals.d, thr = TH().depth / scen.value_scale; for (let i=0;i<d.length;i+=4) if (d[i] !== 255 && d[i] >= thr) n++; }
+  { let n = 0; if (floodVals) { const d = floodVals.d, thr = TH().depth / scen.value_scale; for (let i=0;i<d.length;i+=4) if (d[i] < 250 && d[i] >= thr) n++; }
     if (floodVals) {
       const bb = scen.bounds, sw = L.CRS.EPSG3857.project(L.latLng(bb[0])), ne = L.CRS.EPSG3857.project(L.latLng(bb[1]));
       const px = ((ne.x-sw.x)/floodVals.w) * ((ne.y-sw.y)/floodVals.h) * Math.pow(Math.cos(bb[0][0]*Math.PI/180),2) * 10.7639; // sq ft per pixel

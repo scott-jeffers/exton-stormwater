@@ -63,7 +63,7 @@ for i, c in enumerate(cols): rgba[(d3 >= bins[i]) & (d3 < bins[i + 1])] = c
 def uri(img):
     bio = io.BytesIO(); img.save(bio, 'PNG', optimize=True); return 'data:image/png;base64,' + base64.b64encode(bio.getvalue()).decode()
 vis = uri(Image.fromarray(rgba, 'RGBA').quantize(colors=8, method=Image.Quantize.FASTOCTREE) if False else Image.fromarray(rgba, 'RGBA'))
-val = np.where(np.isfinite(d3), np.clip(np.round(d3 * 10), 0, 254), 255).astype('uint8'); vimg = uri(Image.fromarray(val, 'L'))
+val = np.where(np.isfinite(d3), np.clip(np.round(d3 * 10), 0, 249), 255).astype('uint8'); vimg = uri(Image.fromarray(val, 'L'))
 def dep(x, y):
     c = ((np.asarray(x) - bb[0]) / R).astype(int); r = ((bb[3] - np.asarray(y)) / R).astype(int)
     ok = (r >= 0) & (r < H) & (c >= 0) & (c < W); out = np.full(len(c), np.nan); out[ok] = D[r[ok], c[ok]]; return out
