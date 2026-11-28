@@ -156,8 +156,8 @@ const map=L.map('map',{zoomControl:true}).setView([39.99,-75.75],11);
 const gray=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri, HERE, Garmin, OpenStreetMap',maxNativeZoom:16,maxZoom:19}).addTo(map);
 const ref=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxNativeZoom:16,maxZoom:19,pane:'shadowPane'}).addTo(map);
 const img=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri World Imagery',maxZoom:19});
-const lc=L.control.layers({'Gray':gray,'Imagery':img},{'Labels':ref},{position:'topleft'}).addTo(map);
-const bl=L.layerGroup().addTo(map), dl=L.layerGroup().addTo(map);
+const lc=L.control.layers({'Gray':gray,'Imagery':img},{'Labels':ref,'Buildings touched (≥ 0.5 ft)':bl},{position:'topleft'}).addTo(map);
+const bl=L.layerGroup(), dl=L.layerGroup().addTo(map);
 const lg=L.control({position:'bottomright'});
 lg.onAdd=()=>{const d=L.DomUtil.create('div','legend');d.innerHTML='<b>Max depth (ft)</b><br>'+[['0.5–1','#c6dbef'],['1–2','#9ecae1'],['2–4','#6baed6'],['4–8','#3182bd'],['8+','#08519c']].map(([a,c])=>`<i style="background:${c}"></i>${a}`).join('<br>')+'<br><i style="background:#dc2626;border-radius:50%;width:9px;height:9px"></i>building ≥ 0.5 ft';return d};lg.addTo(map);
 

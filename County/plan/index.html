@@ -48,7 +48,27 @@ tr.click{cursor:pointer}tr.click:hover{background:#f3f7fb}
 .ctl .cov{font-size:11.5px;color:var(--muted);margin:-4px 0 8px}
 .leg i{display:inline-block;width:14px;height:10px;margin-right:5px;vertical-align:-1px}
 .mk{width:14px;height:14px;border-radius:3px;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
-@media(max-width:900px){main{grid-template-columns:1fr;grid-template-rows:50% 50%;height:auto}#mapwrap{height:60vh;order:-1}}
+#lyrBtn{display:none}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:900px){
+  header{padding:10px 14px 8px;gap:6px}header h1{font-size:17px}header .sub{display:none}
+  header nav{margin-left:0;font-size:12px;width:100%;display:flex;gap:12px;overflow-x:auto;white-space:nowrap}header nav a{margin-left:0}
+  .banner{padding:6px 14px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+  .banner.open{white-space:normal}
+  main{display:flex;flex-direction:column;height:auto}
+  #mapwrap{height:52vh;position:relative;border-bottom:1px solid var(--line);order:-1;flex:0 0 auto}
+  aside{border-right:0;overflow:visible}
+  .tabs{overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;padding:0 6px;scrollbar-width:none}
+  .tabs button{flex:0 0 auto;padding:10px 9px}
+  .pane{padding:4px 14px 40px}
+  .kpis{grid-template-columns:repeat(3,1fr);gap:6px}.kpi{padding:8px}.kpi b{font-size:18px}
+  table{font-size:12px;min-width:460px}
+  .ctl{top:8px;right:8px;left:auto;width:auto;max-width:72%;padding:6px 8px;border-radius:8px}
+  .ctl b{display:none}.ctl select{margin:0;font-size:14px;padding:6px;max-width:100%}
+  .ctl .cov,.ctl .rest{display:none}.ctl.open .rest,.ctl.open .cov{display:block}
+  #lyrBtn{display:block;margin-top:6px;width:100%;font:600 12px system-ui;border:1px solid var(--line);background:#f8fafc;border-radius:6px;padding:5px}
+  .ctl label{padding:4px 0}
+}
 </style>
 </head>
 <body>
@@ -140,14 +160,17 @@ tr.click{cursor:pointer}tr.click:hover{background:#f3f7fb}
     <b>Storm</b>
     <select id="storm"></select>
     <div class="cov" id="cov"></div>
+    <button id="lyrBtn" type="button">Layers ▾</button>
+    <div class="rest">
     <label><input type="checkbox" id="lDepth" checked> Flood depth</label>
-    <label><input type="checkbox" id="lBld" checked> Buildings touched</label>
+    <label><input type="checkbox" id="lBld"> Buildings touched</label>
     <label><input type="checkbox" id="lProj" checked> Flood Study projects</label>
     <label><input type="checkbox" id="lDam" checked> Dams</label>
     <label><input type="checkbox" id="lGauge" checked> USGS gauges</label>
     <label><input type="checkbox" id="lHwm" checked> Ida high-water marks</label>
     <label><input type="checkbox" id="lMary" checked> Mary St wetland concept</label>
     <div class="leg fine" style="margin-top:6px"><i style="background:#c6dbef"></i>0.5–1 ft <i style="background:#6baed6"></i>2–4 <i style="background:#08519c"></i>8+ ft</div>
+    </div>
   </div>
 </div>
 </main>
@@ -206,10 +229,13 @@ const gaugeL=L.layerGroup(GAUGES.map(g=>L.marker([g[2],g[3]],{icon:icon('#10b981
 const hwmL=L.layerGroup(HWM.map(h=>L.circleMarker([h[1],h[2]],{radius:7,color:'#7c2d12',weight:2,fillColor:'#fdba74',fillOpacity:1}).bindPopup(`<b>${h[0]}</b><br>Ida mark ${h[3]} ft · model (radar) ${h[6]} ft (${(h[6]-h[3]).toFixed(1)} ft)`)));
 let maryL=L.layerGroup();
 fetch('../results/mary_footprint.geojson').then(r=>r.json()).then(g=>{maryL.addLayer(L.geoJSON(g,{style:{color:'#15803d',weight:2,fillColor:'#4ade80',fillOpacity:.35,dashArray:'4 3'}}).bindPopup('<b>Mary Street wetland concept</b><br>About 40 acres lowered 1.5 ft on average. 100-yr test run in progress.'));});
-[projL,damL,gaugeL,hwmL,maryL,bl].forEach(l=>l.addTo(map));
+[projL,damL,gaugeL,hwmL,maryL].forEach(l=>l.addTo(map));
 const tog={lProj:projL,lDam:damL,lGauge:gaugeL,lHwm:hwmL,lMary:maryL,lBld:bl};
 Object.entries(tog).forEach(([id,l])=>document.getElementById(id).onchange=e=>e.target.checked?l.addTo(map):map.removeLayer(l));
 document.getElementById('lDepth').onchange=()=>draw();
+document.getElementById('lyrBtn').onclick=()=>{const c=document.querySelector('.ctl');c.classList.toggle('open');document.getElementById('lyrBtn').textContent=c.classList.contains('open')?'Layers ▴':'Layers ▾';};
+document.querySelector('.banner').onclick=e=>e.currentTarget.classList.toggle('open');
+document.querySelectorAll('aside table').forEach(t=>{const w=document.createElement('div');w.className='tw';t.parentNode.insertBefore(w,t);w.appendChild(t);});
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.t));});
 fetch('../results/results.json').then(r=>r.json()).then(j=>{R=j;
   const sel=document.getElementById('storm');
@@ -228,7 +254,7 @@ function kpis(){
   const dt=rs.reduce((s,r)=>s+(r.by_muni.Downingtown||0),0), b=rs.reduce((s,r)=>s+r.bldg,0), a=rs.reduce((s,r)=>s+r.acres,0);
   document.getElementById('kpis').innerHTML=`<div class="kpi"><b>${fmt(a)}</b><span>acres under 0.5 ft+ of water</span></div><div class="kpi"><b>${fmt(b)}</b><span>buildings touched</span></div><div class="kpi"><b>${rs.some(r=>r.model==='M02')?fmt(dt):'–'}</b><span>of them in Downingtown Borough</span></div><div class="fine" style="grid-column:1/-1">${document.getElementById('storm').selectedOptions[0].text} · covers ${rs.length} of 6 models</div>`;
 }
-function zoom(a,b,z){map.setView([a,b],z||15)}
+function zoom(a,b,z){map.setView([a,b],z||15); if(window.innerWidth<=900) window.scrollTo({top:0,behavior:'smooth'});}
 function tables(){
   const r=(m,p)=>R.runs[m+'_'+p];
   // RFP
