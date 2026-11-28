@@ -80,6 +80,9 @@ ul.tight{margin:4px 0;padding-left:18px}ul.tight li{margin:2px 0}
     <h2>Ida high-water marks, East Branch (Downingtown)</h2>
     <table id="thwm"></table>
     <div class="note">The modeled Ida water surface is <b>3.5–4.3 ft below</b> every surveyed mark, and lands almost exactly on the FEMA 100-yr elevation. A consistent offset like this points at the rain input, not the hydraulics: this run spread a uniform 6-hour total over each model, and Ida's heaviest bands (7.0 in at Modena, 6.2 in at Chester Springs) fell in about 3 hours. Radar rainfall (MRMS) is the fix. West Branch and main-stem marks get checked once Coatesville Ida and the main-stem runs finish.</div>
+    <h2>Ida rainfall: radar vs what the first Ida runs used</h2>
+    <table id="tmrms"></table>
+    <div class="note">NOAA MRMS radar (gauge-corrected, hourly, ~1 km) shows Downingtown's area got about <b>7.1 in</b>, 20% more than the 5.9 in spread evenly in the first run, and over about 8 hours rather than 6. Turn on the radar layer (top-left layer control) to see the pattern. Ida reruns with this hour-by-hour radar grid are underway.</div>
     <h2>Ida peak flows</h2>
     <table id="tida"></table>
   </div>
@@ -112,9 +115,9 @@ ul.tight{margin:4px 0;padding-left:18px}ul.tight li{margin:2px 0}
     <ul class="tight small" id="nextlist">
       <li>Coatesville (West Branch) Ida: running on the office PC.</li>
       <li>Main stem Ida: runs on NEER once Coatesville Ida finishes.</li>
-      <li>Hibernia Dam: the dam line reaches the West Branch, so too much flow passes the weir. Fix before using Coatesville dam numbers.</li>
+      <li>Hibernia Dam line fixed (Nov 27); Coatesville dam numbers on this page are from before the fix.</li>
       <li>24-hr design storms (10/25/50/100/500-yr) for a like-for-like check of the Study flows.</li>
-      <li>Radar (MRMS) rainfall for Ida.</li>
+      <li>Ida with radar (MRMS) rainfall: running, upstream models first.</li><li>Mary Street wetland concept (about 42 acres of floodplain lowered 1.5 ft on average, about 100,000 cubic yards): 100-yr test run queued.</li>
     </ul>
   </div>
 </aside>
@@ -148,12 +151,15 @@ const map=L.map('map',{zoomControl:true}).setView([39.99,-75.75],11);
 const gray=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri, HERE, Garmin, OpenStreetMap',maxNativeZoom:16,maxZoom:19}).addTo(map);
 const ref=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxNativeZoom:16,maxZoom:19,pane:'shadowPane'}).addTo(map);
 const img=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri World Imagery',maxZoom:19});
-L.control.layers({'Gray':gray,'Imagery':img},{'Labels':ref},{position:'topleft'}).addTo(map);
+const lc=L.control.layers({'Gray':gray,'Imagery':img},{'Labels':ref},{position:'topleft'}).addTo(map);
 const bl=L.layerGroup().addTo(map), dl=L.layerGroup().addTo(map);
 const lg=L.control({position:'bottomright'});
 lg.onAdd=()=>{const d=L.DomUtil.create('div','legend');d.innerHTML='<b>Max depth (ft)</b><br>'+[['0.5–1','#c6dbef'],['1–2','#9ecae1'],['2–4','#6baed6'],['4–8','#3182bd'],['8+','#08519c']].map(([a,c])=>`<i style="background:${c}"></i>${a}`).join('<br>')+'<br><i style="background:#dc2626;border-radius:50%;width:9px;height:9px"></i>building ≥ 0.5 ft';return d};lg.addTo(map);
 
-fetch('results.json').then(r=>r.json()).then(j=>{R=j;draw();tables();});
+fetch('results.json').then(r=>r.json()).then(j=>{R=j;draw();tables();
+  if(R.mrms){lc.addOverlay(L.imageOverlay('img/ida_mrms_total.png',R.mrms.bounds,{opacity:.7}),'Ida radar rainfall (MRMS total)');
+   const o=['M03','M12','M01','M02','M04','M05'];
+   document.getElementById('tmrms').innerHTML='<tr><th>Model</th><th class="n">Radar total (in)</th><th class="n">Used in Ida run (in)</th><th class="n">Diff</th></tr>'+o.map(m=>`<tr><td>${m}</td><td class="n">${R.mrms.mean_in[m].toFixed(2)}</td><td class="n">${R.mrms.used_in[m]!=null?R.mrms.used_in[m].toFixed(1):'(scaled)'}</td><td class="n">${R.mrms.used_in[m]!=null?pct(R.mrms.mean_in[m],R.mrms.used_in[m]):''}</td></tr>`).join('');}});
 document.querySelectorAll('#storm button').forEach(b=>b.onclick=()=>{plan=b.dataset.p;document.querySelectorAll('#storm button').forEach(x=>x.classList.toggle('on',x===b));draw();tables();});
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.t));});
 
